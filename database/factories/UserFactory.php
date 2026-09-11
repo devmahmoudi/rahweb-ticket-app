@@ -42,7 +42,7 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'email_verified_at' => null,
         ]);
     }
@@ -52,7 +52,7 @@ class UserFactory extends Factory
      */
     public function customer(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'type' => UserType::CUSTOMER->value,
             'customer_id' => Customer::factory(),
         ]);
@@ -63,17 +63,18 @@ class UserFactory extends Factory
      */
     public function operator(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'type' => UserType::OPERATOR->value,
         ]);
     }
+
 
     /**
      * Indicate admin type for new user.
      */
     public function admin(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'type' => UserType::ADMIN->value,
         ]);
     }
