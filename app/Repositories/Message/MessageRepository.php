@@ -4,13 +4,11 @@ namespace App\Repositories\Message;
 
 use App\Models\Chat;
 use App\Models\Message;
-use App\Models\Ticket;
-use App\View\Components\InitialTicketMessage;
 use function app;
 
 class MessageRepository
 {
-    use HasTicketMessageMethods, HasTaskMessageMethods;
+    use HasTicketMessageMethods;
 
     /**
      * Create a new class instance.

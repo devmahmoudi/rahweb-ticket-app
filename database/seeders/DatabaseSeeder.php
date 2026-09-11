@@ -8,7 +8,6 @@ use App\Models\Media;
 use App\Models\Message;
 use App\Models\Permission;
 use App\Models\Role;
-use App\Models\Task;
 use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -82,12 +81,11 @@ class DatabaseSeeder extends Seeder
 
     private function seedOperatorRole(): Role
     {
-        $operatorPermissions = Permission::whereModel(Chat::class)
-            ->orWhere->whereModel(Customer::class)
-            ->orWhere->whereModel(Media::class)
-            ->orWhere->whereModel(Message::class)
-            ->orWhere->whereModel(Task::class)
-            ->orWhere->whereModel(Ticket::class)
+        $operatorPermissions = Permission::where('model', Chat::class)
+            ->orWhere('model', Customer::class)
+            ->orWhere('model', Media::class)
+            ->orWhere('model', Message::class)
+            ->orWhere('model', Ticket::class)
             ->get()
             ->pluck("id")
             ->toArray();

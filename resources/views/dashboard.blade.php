@@ -148,26 +148,6 @@
                     ticketImpressionChart.render();
                 }
 
-                // task chart
-                const taskImpressionEle = document.querySelector('#task-impression');
-                const taskImpressionConfig = impressionChartConfig
-
-                impressionChartConfig.series = [
-                    {{ \App\Facades\TaskRepositoryFacade::count(taskStatus: \App\Enums\Task\TaskStatus::PENDING->value) }},
-                    {{ \App\Facades\TaskRepositoryFacade::count(taskStatus: \App\Enums\Task\TaskStatus::SENT->value) }},
-                    {{ \App\Facades\TaskRepositoryFacade::count(taskStatus: \App\Enums\Task\TaskStatus::CLOSED->value) }},
-                ]
-
-                impressionChartConfig.labels = [
-                    '{{ \App\Enums\Task\TaskStatus::PENDING->value }}',
-                    '{{ \App\Enums\Task\TaskStatus::SENT->value }}',
-                    '{{ \App\Enums\Task\TaskStatus::CLOSED->value}}'
-                ]
-
-                if (typeof taskImpressionEle !== undefined && taskImpressionEle !== null) {
-                    const taskImpressionChart = new ApexCharts(taskImpressionEle, taskImpressionConfig);
-                    taskImpressionChart.render();
-                }
             })();
 
         </script>
@@ -183,13 +163,6 @@
                 </div>
         @endcan
 
-        @can('viewAny', \App\Models\Task::class)
-            <!-- Task -->
-                <div>
-                    <h4>وظایف</h4>
-                    <div id="task-impression"></div>
-                </div>
-            @endcan
         </div>
     </div>
 </x-app-layout>

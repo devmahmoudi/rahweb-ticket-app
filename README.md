@@ -1,6 +1,6 @@
 # Rahweb Ticket
 
-Rahweb Ticket is a customer support and internal work-management application built with Laravel and Livewire. It provides role-based access for administrators, operators, and customers, with support for tickets, tasks, chat, workgroups, meetings, purchases, bugs, media, and permissions.
+Rahweb Ticket is a customer support application built with Laravel and Livewire. It provides role-based access for administrators, operators, and customers, with support for tickets, chat, workgroups, media, and permissions.
 
 ## Requirements
 
@@ -89,10 +89,7 @@ These credentials are for local development only and must be changed or removed 
 - Workgroups and user assignment
 - Operator and customer management
 - Ticket creation and closing
-- Task creation, referral, and closing
 - Real-time chat and messaging
-- Purchases and meetings
-- Bug tracking
 - Media uploads
 
 ## Useful commands
