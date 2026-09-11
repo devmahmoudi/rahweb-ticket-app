@@ -52,42 +52,6 @@
                 </li>
             @endcan
 
-        <!-- Purchase -->
-            @can('viewAny', \App\Models\Purchase::class)
-                <li @class(['menu-item', 'active' => (\Illuminate\Support\Str::startsWith(request()->getRequestUri(), '/purchase'))])>
-                    <a
-                       href="{{ route('purchase.index') }}"
-                       class="menu-link">
-                        <i class='menu-icon bx bx-money'></i>
-                        <div>فروش</div>
-                    </a>
-                </li>
-            @endcan
-
-        <!-- Meeting -->
-            @can('viewAny', \App\Models\Meeting::class)
-                <li @class(['menu-item', 'active' => (\Illuminate\Support\Str::startsWith(request()->getRequestUri(), '/meeting'))])>
-                    <a
-                       href="{{ route('meeting.index') }}"
-                       class="menu-link">
-                        <i class='menu-icon bx bxs-user-voice'></i>
-                        <div>صورت جلسات</div>
-                    </a>
-                </li>
-            @endcan
-
-        <!-- Bug -->
-            @can('viewAny', \App\Models\Bug::class)
-                <li @class(['menu-item', 'active' => (\Illuminate\Support\Str::startsWith(request()->getRequestUri(), '/bug'))])>
-                    <a
-                       href="{{ route('bug.index') }}"
-                       class="menu-link">
-                        <i class='menu-icon bx bxs-bug'></i>
-                        <div>باگ ها</div>
-                    </a>
-                </li>
-            @endcan
-
         <!-- Media -->
             @can('viewAny', \App\Models\Media::class)
                 <li @class(['menu-item', 'active' => (\Illuminate\Support\Str::startsWith(request()->getRequestUri(), '/media'))])>
@@ -118,18 +82,6 @@
                             <div>تیکت ها</div>
                         </a>
                     @endif
-                </li>
-            @endcan
-
-        <!-- Task -->
-            @can('viewAny', \App\Models\Task::class)
-                <li @class(['menu-item', 'active' => (\Illuminate\Support\Str::startsWith(request()->getRequestUri(), '/task'))])>
-                    <a
-                       href="{{ route('task.index', ['type' => \App\Enums\Task\TaskType::SUBMIT->value]) }}"
-                       class="menu-link">
-                        <i class='menu-icon bx bx-task'></i>
-                        <div>وظایف</div>
-                    </a>
                 </li>
             @endcan
 

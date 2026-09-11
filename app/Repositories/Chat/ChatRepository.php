@@ -3,18 +3,15 @@
 namespace App\Repositories\Chat;
 
 use App\Models\Chat;
-use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use function app;
 use function auth;
 use function config;
 
 class ChatRepository
 {
-    use HasTicketChatMethods, HasTaskChatMethods;
+    use HasTicketChatMethods;
 
     public function find(int $id):Chat|null
     {

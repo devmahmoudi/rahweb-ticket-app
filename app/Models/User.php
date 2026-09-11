@@ -9,8 +9,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -53,56 +51,6 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
-    }
-
-    /**
-     * Reported bugs
-     *
-     * @return HasMany
-     */
-    public function bugs():HasMany
-    {
-        return $this->hasMany(Bug::class, 'creator_id');
-    }
-
-    /**
-     * All meeting records that created by the user
-     *
-     * @return HasMany
-     */
-    public function meetings(): HasMany
-    {
-        return $this->hasMany(Meeting::class);
-    }
-
-    /**
-     * All purchase records that created by the user
-     *
-     * @return HasMany
-     */
-    public function purchases(): HasMany
-    {
-        return $this->hasMany(Purchase::class);
-    }
-
-    /**
-     * All tasks that created by the user.
-     *
-     * @return HasMany
-     */
-    public function submitTasks(): HasMany
-    {
-        return $this->hasMany(Task::class, 'creator_id');
-    }
-
-    /**
-     * All tasks that received in the user cartable.
-     *
-     * @return HasMany
-     */
-    public function receivedTasks(): HasMany
-    {
-        return $this->hasMany(Task::class, 'recipient_id');
     }
 
     /**
