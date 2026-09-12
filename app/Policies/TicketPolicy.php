@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Enums\Permission\BasicPermission;
 use App\Enums\Ticket\TicketStatus;
+use App\Enums\User\UserType;
 use App\Models\Ticket;
 use App\Models\User;
 
@@ -84,6 +85,18 @@ class TicketPolicy
             return false;
 
         return false;
+    }
+
+    /**
+     * Determine whether the user can assign the ticket to another user.
+     */
+    public function assign(User $user, Ticket $ticket): bool
+    {
+        if ($ticket->status !== TicketStatus::PENDING->value) {
+            return false;
+        }
+
+        return $user->isAdmin() || $ticket->recipient_id === $user->id;
     }
 
     /**
