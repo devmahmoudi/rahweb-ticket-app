@@ -108,7 +108,10 @@ class TicketAssignmentTest extends TestCase
         $this->assertNotNull($message);
         $this->assertSame($assigner->id, $message->user_id);
         $this->assertSame($ticket->chat()->id, $message->chat_id);
-        $this->assertStringContainsString('واگذار', $message->body);
+        $this->assertSame(
+            "{$assigner->name} تیکت شما را به  {$target->name} ارجاع داد",
+            $message->body
+        );
     }
 
     public function test_new_ticket_uses_workgroup_without_recipient_and_user_channel_with_recipient(): void

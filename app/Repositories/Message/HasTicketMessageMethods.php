@@ -53,7 +53,7 @@ trait HasTicketMessageMethods
     public function createTicketAssignmentMessage(Ticket $ticket, User $assigner):Message|false
     {
         return $this->create([
-            'body' => "تیکت توسط {$assigner->name} واگذار شد.",
+            'body' => "{$assigner->name} تیکت شما را به  {$ticket->recipient->name} ارجاع داد",
             'user_id' => $assigner->id,
         ]);
     }
