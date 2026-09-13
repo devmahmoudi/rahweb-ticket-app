@@ -153,7 +153,7 @@ class TicketAssignmentTest extends TestCase
         $this->assertSame($assigner->id, $message->user_id);
         $this->assertSame($ticket->chat()->id, $message->chat_id);
         $this->assertSame(
-            "{$assigner->name} تیکت شما را به  {$target->name} ارجاع داد",
+            "{$assigner->name} تیکت شما را به  {$target->name} ارجاع کرد",
             $message->body
         );
         $this->assertFalse($chat->members()->whereKey($recipient->id)->exists());

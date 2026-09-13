@@ -22,7 +22,7 @@ The ticket assignment policy should add in the [TicketPolicy](../app/Policies/Ti
 - An alert [Message](../app/Models/Message.php) should send in the [Ticket](../app/Models/Ticket.php)'s [Chat](../app/Models/Chat.php) about assignment. The message.user_id should equal to user who assign ticket to target user.
 - Ticket assignment alert message should be:
 ```php
-"{$assigner->name} تیکت شما را به  {$target->name} ارجاع داد"
+"{$assigner->name} تیکت شما را به  {$target->name} ارجاع کرد"
 ```
 - After assign ticket, prior ticket recipient should detach from ticket.chat.memebers and the new recipient should attach to ticket.chat.memebers
 
