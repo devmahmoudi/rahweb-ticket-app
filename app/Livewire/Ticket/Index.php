@@ -4,10 +4,10 @@ namespace App\Livewire\Ticket;
 
 use App\Enums\Ticket\TicketStatus;
 use App\Enums\User\UserType;
-use App\Models\Chat;
 use App\Models\Ticket;
-use App\Repositories\Chat\ChatRepository;
 use App\Repositories\TicketRepository;
+use Illuminate\Database\Eloquent\Collection;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
@@ -73,9 +73,15 @@ class Index extends Component
             session()->now('alert-danger', 'وجود خطا در سرور !');
     }
 
+    #[On('ticket-assigned')]
+    public function refreshAfterAssignment(): void
+    {
+    }
+
     public function mount()
     {
         $this->authorize('viewAny', Ticket::class);
+
     }
 
     public function render()

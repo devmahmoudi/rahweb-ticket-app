@@ -46,6 +46,12 @@
                                     بستن تیکت
                                 </a>
                             @endif
+                            @can('assign', $ticket)
+                                <button class="btn btn-outline-warning btn-sm"
+                                        wire:click="$dispatch('open-ticket-assignment', { ticketId: {{ $ticket->id }} })">
+                                    واگذاری
+                                </button>
+                            @endcan
                         </td>
                     </tr>
                 @endforeach
@@ -53,5 +59,6 @@
             </table>
         </div>
 
+        <livewire:ticket.assignment />
     </div>
 </div>

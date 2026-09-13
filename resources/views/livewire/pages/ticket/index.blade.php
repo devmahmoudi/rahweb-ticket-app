@@ -66,6 +66,12 @@
                                     @can('view', $ticket)
                                         <button class="btn btn-outline-primary btn-sm">گفتگو</button>
                                     @endcan
+                                    @can('assign', $ticket)
+                                        <button class="btn btn-outline-warning btn-sm"
+                                                wire:click="$dispatch('open-ticket-assignment', { ticketId: {{ $ticket->id }} })">
+                                            واگذاری
+                                        </button>
+                                    @endcan
                                 </td>
                             </tr>
                         @endforeach
@@ -77,5 +83,7 @@
 
     </div>
     {{ $tickets->links('vendor.livewire.bootstrap') }}
+
+    <livewire:ticket.assignment />
 </div>
 

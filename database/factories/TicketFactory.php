@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Enums\Ticket\TicketStatus;
-use App\Models\Customer;
 use App\Models\User;
 use App\Models\Workgroup;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -25,7 +24,7 @@ class TicketFactory extends Factory
             'description' => $this->faker->realText,
             'workgroup_id' => Workgroup::factory(),
             'recipient_id' => User::factory(),
-            'customer_id' => Customer::factory(),
+            'user_id' => User::factory()->customer(),
             'status' => $this->faker->randomElement(array_values(TicketStatus::cases()))
         ];
     }

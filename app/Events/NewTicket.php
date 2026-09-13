@@ -3,9 +3,7 @@
 namespace App\Events;
 
 use App\Models\Ticket;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -30,7 +28,9 @@ class NewTicket implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel("workgroup.{$this->ticket->workgroup_id}")
+            $this->ticket->recipient_id
+                ? new PrivateChannel("user.{$this->ticket->recipient_id}")
+                : new PrivateChannel("workgroup.{$this->ticket->workgroup_id}")
         ];
     }
 }

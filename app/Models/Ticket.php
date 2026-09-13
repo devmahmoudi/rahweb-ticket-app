@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Events\NewTicket;
+use App\Observers\TicketObserver;
 use App\Models\Scopes\TicketUserTypeScope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,6 +23,11 @@ class Ticket extends Model
     protected $dispatchesEvents = [
         'created' => NewTicket::class
     ];
+
+    protected static function booted(): void
+    {
+        static::observe(TicketObserver::class);
+    }
 
     /**
      * Specify the workgroup to which the ticket was sent

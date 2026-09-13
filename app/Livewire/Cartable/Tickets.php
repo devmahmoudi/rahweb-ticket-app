@@ -7,6 +7,7 @@ use App\Models\Ticket;
 use App\Repositories\Message\MessageRepository;
 use App\Repositories\TicketRepository;
 use Illuminate\Database\Eloquent\Collection;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class Tickets extends Component
@@ -23,18 +24,24 @@ class Tickets extends Component
             $listeners["echo-private:workgroup.{$workgroup->id},TicketClosed"] = 'removeTicket';
         }
 
+        $listeners["echo-private:user." . auth()->id() . ",NewTicket"] = 'newTicket';
+
         return $listeners;
     }
 
     public function newTicket($event)
     {
-        $ticket = $event['ticket'];
+        $this->tickets = app()->make(TicketRepository::class)
+            ->notClosedTickets(false)
+            ->sortByDesc('created_at');
+    }
 
-        if($ticket = Ticket::find($ticket['id'])){
-            $this->tickets->push($ticket);
-
-            $this->tickets = $this->tickets->sortByDesc('created_at');
-        }
+    #[On('ticket-assigned')]
+    public function refreshAfterAssignment(): void
+    {
+        $this->tickets = app()->make(TicketRepository::class)
+            ->notClosedTickets(false)
+            ->sortByDesc('created_at');
     }
 
     /**
@@ -104,6 +111,7 @@ class Tickets extends Component
         $this->tickets =
             $ticketRepository->notClosedTickets(false)
                 ->sortByDesc('created_at');
+
     }
 
     public function render()
