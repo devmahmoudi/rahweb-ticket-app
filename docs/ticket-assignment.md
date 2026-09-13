@@ -20,7 +20,11 @@ The ticket assignment policy should add in the [TicketPolicy](../app/Policies/Ti
 - [NewTicket](../app/Events/NewTicket.php) should broadcast only to target user of assignment
 - [Tickets](../app/Livewire/Cartable/Tickets.php) Livewire component should listen to [NewTicket](../app/Events/NewTicket.php) even on the **user.{user_id}** channel and refresh the tickets list on receive the event
 - An alert [Message](../app/Models/Message.php) should send in the [Ticket](../app/Models/Ticket.php)'s [Chat](../app/Models/Chat.php) about assignment. The message.user_id should equal to user who assign ticket to target user.
-- Ticket assignment alert message should be: $assigner_user_name assigned your ticket to $assigny_user_name
+- Ticket assignment alert message should be:
+```php
+"{$assigner->name} تیکت شما را به  {$target->name} ارجاع داد"
+```
+- After assign ticket, prior ticket recipient should detach from ticket.chat.memebers and the new recipient should attach to ticket.chat.memebers
 
 ## Notes
 Before adding the assignment option, the [NewTicket](../app/Events/NewTicket.php) broadcasts to the workgroup private channel **"workgroup.{workgroup_id}"**.

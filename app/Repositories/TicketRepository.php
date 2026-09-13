@@ -184,6 +184,23 @@ class TicketRepository
         return Chat::withoutGlobalScopes()->where('meta', Ticket::class . ",$ticket->id")->first();
     }
 
+    public function assignTicket(Ticket $ticket, User $targetUser):void
+    {
+        DB::transaction(function () use ($ticket, $targetUser): void {
+            $chat = $this->findRelevantChat($ticket);
+
+            if ($chat) {
+                $chat->members()->detach($ticket->recipient_id);
+            }
+
+            $ticket->update(['recipient_id' => $targetUser->id]);
+
+            if ($chat) {
+                $chat->members()->syncWithoutDetaching([$targetUser->id]);
+            }
+        });
+    }
+
     public function update(Ticket $ticket, array $data):bool
     {
         return $ticket->update($data);

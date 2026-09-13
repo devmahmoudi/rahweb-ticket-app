@@ -3,23 +3,16 @@
 namespace App\Livewire\Cartable;
 
 use App\Enums\Ticket\TicketStatus;
-use App\Enums\User\UserType;
 use App\Models\Ticket;
-use App\Models\User;
 use App\Repositories\Message\MessageRepository;
 use App\Repositories\TicketRepository;
 use Illuminate\Database\Eloquent\Collection;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class Tickets extends Component
 {
     public Collection $tickets;
-
-    public Collection $assignmentUsers;
-
-    public ?int $assignmentTicketId = null;
-
-    public ?int $assignmentUserId = null;
 
     public function getListeners()
     {
@@ -43,39 +36,12 @@ class Tickets extends Component
             ->sortByDesc('created_at');
     }
 
-    public function openAssignmentModal(Ticket $ticket): void
+    #[On('ticket-assigned')]
+    public function refreshAfterAssignment(): void
     {
-        $this->authorize('assign', $ticket);
-
-        $this->assignmentTicketId = $ticket->id;
-        $this->assignmentUserId = null;
-    }
-
-    public function assignTicket(): void
-    {
-        $ticket = Ticket::findOrFail($this->assignmentTicketId);
-
-        $this->authorize('assign', $ticket);
-
-        $this->validate([
-            'assignmentUserId' => ['required', 'integer', 'exists:users,id'],
-        ]);
-
-        $target = User::query()
-            ->whereKey($this->assignmentUserId)
-            ->whereIn('type', [UserType::OPERATOR->value, UserType::ADMIN->value])
-            ->firstOrFail();
-
-        if ($target->id === $ticket->recipient_id) {
-            $this->addError('assignmentUserId', 'کاربر مقصد باید با پاسخگوی فعلی متفاوت باشد.');
-
-            return;
-        }
-
-        $ticket->update(['recipient_id' => $target->id]);
-        $this->assignmentTicketId = null;
-        $this->assignmentUserId = null;
-        session()->now('alert-success', 'تیکت با موفقیت واگذار شد.');
+        $this->tickets = app()->make(TicketRepository::class)
+            ->notClosedTickets(false)
+            ->sortByDesc('created_at');
     }
 
     /**
@@ -146,11 +112,6 @@ class Tickets extends Component
             $ticketRepository->notClosedTickets(false)
                 ->sortByDesc('created_at');
 
-        $this->assignmentUsers = User::query()
-            ->whereIn('type', [UserType::OPERATOR->value, UserType::ADMIN->value])
-            ->where('id', '!=', auth()->id())
-            ->orderBy('name')
-            ->get();
     }
 
     public function render()

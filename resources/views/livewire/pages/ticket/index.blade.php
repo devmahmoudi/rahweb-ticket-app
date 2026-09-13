@@ -68,7 +68,7 @@
                                     @endcan
                                     @can('assign', $ticket)
                                         <button class="btn btn-outline-warning btn-sm"
-                                                wire:click="openAssignmentModal({{ $ticket->id }})">
+                                                wire:click="$dispatch('open-ticket-assignment', { ticketId: {{ $ticket->id }} })">
                                             واگذاری
                                         </button>
                                     @endcan
@@ -84,30 +84,6 @@
     </div>
     {{ $tickets->links('vendor.livewire.bootstrap') }}
 
-    @if($assignmentTicketId)
-        <div class="modal d-block" tabindex="-1" role="dialog" style="background: rgba(0, 0, 0, .5)">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">واگذاری تیکت</h5>
-                        <button type="button" class="btn-close" wire:click="$set('assignmentTicketId', null)"></button>
-                    </div>
-                    <div class="modal-body">
-                        <select wire:model="assignmentUserId" class="form-select">
-                            <option value="">پاسخگوی جدید را انتخاب کنید</option>
-                            @foreach($assignmentUsers as $user)
-                                <option value="{{ $user->id }}">{{ $user->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('assignmentUserId') <small class="text-danger">{{ $message }}</small> @enderror
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" wire:click="$set('assignmentTicketId', null)">انصراف</button>
-                        <button type="button" class="btn btn-primary" wire:click="assignTicket">تایید واگذاری</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
+    <livewire:ticket.assignment />
 </div>
 

@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Enums\Ticket\TicketStatus;
 use App\Events\NewTicket;
 use App\Events\TicketAssigmentChanged;
+use App\Models\Chat;
 use App\Models\Ticket;
 use App\Repositories\Message\MessageRepository;
 
@@ -29,7 +30,11 @@ class TicketObserver
             $ticket->getOriginal('recipient_id') !== null &&
             $ticket->recipient_id !== null
         ) {
-            if ($assigner = auth()->user() and $chat = $ticket->chat()) {
+            $chat = Chat::withoutGlobalScopes()
+                ->where('meta', Ticket::class . ",{$ticket->id}")
+                ->first();
+
+            if ($assigner = auth()->user() and $chat) {
                 app()->makeWith(MessageRepository::class, ['chat' => $chat])
                     ->createTicketAssignmentMessage($ticket, $assigner);
             }
