@@ -9,6 +9,7 @@ use App\Livewire\Cartable\Tickets as CartableTickets;
 use App\Livewire\Ticket\Index;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Models\Chat;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Livewire\Livewire;
@@ -83,6 +84,31 @@ class TicketAssignmentTest extends TestCase
         Event::assertDispatched(NewTicket::class, function ($event) use ($ticket, $target) {
             return $event->ticket->is($ticket) && $event->ticket->recipient_id === $target->id;
         });
+    }
+
+    public function test_assignment_creates_an_alert_message_from_the_assigner_in_the_ticket_chat(): void
+    {
+        Event::fakeExcept(['eloquent.updated: ' . Ticket::class]);
+
+        $assigner = User::factory()->admin()->create();
+        $recipient = User::factory()->operator()->create();
+        $target = User::factory()->operator()->create();
+        $ticket = Ticket::factory()->pending()->operator($recipient)->create();
+
+        $chat = Chat::factory()->create([
+            'meta' => Ticket::class . ",{$ticket->id}",
+        ]);
+        $chat->members()->attach($assigner);
+
+        $this->actingAs($assigner);
+        $ticket->update(['recipient_id' => $target->id]);
+
+        $message = $ticket->chat()->messages()->latest('id')->first();
+
+        $this->assertNotNull($message);
+        $this->assertSame($assigner->id, $message->user_id);
+        $this->assertSame($ticket->chat()->id, $message->chat_id);
+        $this->assertStringContainsString('واگذار', $message->body);
     }
 
     public function test_new_ticket_uses_workgroup_without_recipient_and_user_channel_with_recipient(): void
