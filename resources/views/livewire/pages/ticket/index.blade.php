@@ -14,10 +14,21 @@
         <div class="card text-center">
             <div class="card-header border-bottom">
                 <ul class="nav nav-pills d-none d-md-flex" role="tablist">
+                    @if(\Illuminate\Support\Facades\Gate::allows('cartable'))
+                        <li class="nav-item">
+                            <a href="{{ route('ticket.index', ['status' => \App\Livewire\Ticket\Index::CARTABLE_FILTER]) }}"
+                               @class(['nav-link', 'active' => $selectedStatus === \App\Livewire\Ticket\Index::CARTABLE_FILTER])>
+                                کارتابل
+                                @if($cartableCount > 0)
+                                    <span class="badge bg-secondary ms-1">{{ $cartableCount }}</span>
+                                @endif
+                            </a>
+                        </li>
+                    @endif
                     @foreach(\App\TicketStateManagement\TicketState::cases() as $state)
                         <li class="nav-item">
                             <a href="{{ route('ticket.index', ['status' => $state->value]) }}"
-                               @class(['nav-link', 'active' => (($status ?: \App\TicketStateManagement\TicketState::PENDING->value) === $state->value)])>
+                               @class(['nav-link', 'active' => $selectedStatus === $state->value])>
                                 @switch($state)
                                     @case(\App\TicketStateManagement\TicketState::PENDING)
                                         در انتظار رسیدگی
@@ -45,9 +56,15 @@
                 <form class="d-md-none p-3" method="GET" action="{{ route('ticket.index') }}">
                     <label class="visually-hidden" for="ticket-status">وضعیت تیکت</label>
                     <select id="ticket-status" name="status" class="form-select" onchange="this.form.submit()">
+                        @if(\Illuminate\Support\Facades\Gate::allows('cartable'))
+                            <option value="{{ \App\Livewire\Ticket\Index::CARTABLE_FILTER }}"
+                                @selected($selectedStatus === \App\Livewire\Ticket\Index::CARTABLE_FILTER)>
+                                کارتابل @if($cartableCount > 0)({{ $cartableCount }})@endif
+                            </option>
+                        @endif
                         @foreach(\App\TicketStateManagement\TicketState::cases() as $state)
                             <option value="{{ $state->value }}"
-                                @selected(($status ?: \App\TicketStateManagement\TicketState::PENDING->value) === $state->value)>
+                                @selected($selectedStatus === $state->value)>
                                 @switch($state)
                                     @case(\App\TicketStateManagement\TicketState::PENDING)
                                         در انتظار رسیدگی

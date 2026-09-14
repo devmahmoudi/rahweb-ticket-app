@@ -12,6 +12,8 @@ use Livewire\Component;
 
 class Index extends Component
 {
+    public const CARTABLE_FILTER = 'cartable';
+
     private TicketRepository $ticketRepository;
 
     #[Url]
@@ -40,6 +42,19 @@ class Index extends Component
         $this->ticketRepository->delete($ticket);
     }
 
+    public function getListeners(): array
+    {
+        $listeners = [];
+
+        foreach (auth()->user()->workgroups as $workgroup) {
+            $listeners["echo-private:workgroup.{$workgroup->id},NewTicket"] = 'newTicket';
+        }
+
+        $listeners["echo-private:user." . auth()->id() . ",NewTicket"] = 'newTicket';
+
+        return $listeners;
+    }
+
     #[On('ticket-assigned')]
     public function refreshAfterAssignment(): void
     {
@@ -53,18 +68,29 @@ class Index extends Component
 
     public function render()
     {
+        $canViewCartable = \Illuminate\Support\Facades\Gate::allows('cartable');
+        $selectedStatus = $this->status ?: ($canViewCartable ? self::CARTABLE_FILTER : TicketState::PENDING->value);
+
+        if ($selectedStatus === self::CARTABLE_FILTER) {
+            abort_unless(\Illuminate\Support\Facades\Gate::allows('cartable'), 403);
+        }
+
         $ticketCounts = collect(TicketState::cases())
             ->mapWithKeys(fn (TicketState $state) => [
                 $state->value => $this->ticketRepository->count(TicketState: $state->value),
             ]);
 
-        if(auth()->user()->type == UserType::CUSTOMER->value)
-            $tickets = $this->ticketRepository->getWithStatusScope($this->status ?: TicketState::PENDING->value);
+        if ($selectedStatus === self::CARTABLE_FILTER) {
+            $tickets = $this->ticketRepository->cartableTickets();
+        } elseif(auth()->user()->type == UserType::CUSTOMER->value)
+            $tickets = $this->ticketRepository->getWithStatusScope($selectedStatus);
         else
-            $tickets = $this->ticketRepository->getWithStatusScope($this->status ?: TicketState::PENDING->value);
+            $tickets = $this->ticketRepository->getWithStatusScope($selectedStatus);
 
         return view('livewire.pages.ticket.index')
             ->with('ticketCounts', $ticketCounts)
+            ->with('cartableCount', $canViewCartable ? $this->ticketRepository->cartableTickets(false)->count() : 0)
+            ->with('selectedStatus', $selectedStatus)
             ->with('tickets', $tickets);
     }
 }

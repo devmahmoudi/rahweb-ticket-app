@@ -40,11 +40,6 @@ Route::middleware(['auth', 'verified'])->group(function(){
         Route::get('/create', \App\Livewire\Ticket\Create::class)->name('create');
     });
 
-    // cartable
-    Route::prefix('cartable/')->name('cartable.')->group(function(){
-        Route::get('/', \App\Livewire\Cartable\Index::class)->name('index');
-    });
-
     // chat
     Route::prefix('/chat')->group(function(){
        Route::get('/{chat?}', \App\Livewire\Messenger\Chat::class)->name('chat');

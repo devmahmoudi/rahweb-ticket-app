@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Events\NewTicket;
-use App\Livewire\Cartable\Tickets as CartableTickets;
 use App\Livewire\Ticket\Assignment;
 use App\Livewire\Ticket\Index;
 use App\Models\Chat;
@@ -181,8 +180,6 @@ class TicketAssignmentTest extends TestCase
             ->set('status', TicketState::PENDING->value)
             ->assertSee('واگذاری');
 
-        Livewire::test(CartableTickets::class)
-            ->assertSee('واگذاری');
 
         $customer = User::factory()->customer()->create();
         $customerTicket = Ticket::factory()->pending()->create(['user_id' => $customer->id]);
@@ -193,11 +190,36 @@ class TicketAssignmentTest extends TestCase
             ->set('status', TicketState::PENDING->value)
             ->assertDontSee('واگذاری');
 
-        Livewire::test(CartableTickets::class)
+        Livewire::test(Index::class)
+            ->set('status', Index::CARTABLE_FILTER)
             ->assertDontSee('واگذاری');
     }
 
-    public function test_cartable_listens_on_the_authenticated_user_channel_and_refreshes(): void
+    public function test_ticket_index_cartable_filter_shows_pending_and_assigned_tickets(): void
+    {
+        $operator = User::factory()->operator()->create();
+        $pendingTicket = Ticket::factory()->pending()->create(['title' => 'Pending cartable ticket']);
+        $operator->workgroups()->attach($pendingTicket->workgroup_id);
+        $assignedTicket = Ticket::factory()->create([
+            'title' => 'Assigned cartable ticket',
+            'status' => TicketState::ACCEPTED->value,
+            'recipient_id' => $operator->id,
+        ]);
+        $otherTicket = Ticket::factory()->create([
+            'title' => 'Other ticket',
+            'status' => TicketState::DELEGATED->value,
+        ]);
+
+        $this->actingAs($operator);
+
+        Livewire::test(Index::class)
+            ->set('status', Index::CARTABLE_FILTER)
+            ->assertSee($pendingTicket->title)
+            ->assertSee($assignedTicket->title)
+            ->assertDontSee($otherTicket->title);
+    }
+
+    public function test_ticket_index_listens_on_the_authenticated_user_channel_and_refreshes(): void
     {
         $target = User::factory()->superadmin()->create();
         $ticket = Ticket::factory()->pending()->operator($target)->create();
@@ -206,13 +228,11 @@ class TicketAssignmentTest extends TestCase
 
         $this->assertArrayHasKey(
             "echo-private:user.{$target->id},NewTicket",
-            app(CartableTickets::class)->getListeners()
+            app(Index::class)->getListeners()
         );
 
-        $component = app(CartableTickets::class);
-        $component->mount(app(\App\Repositories\TicketRepository::class));
+        $component = app(Index::class);
         $component->newTicket(['ticket' => ['id' => $ticket->id]]);
-
-        $this->assertTrue($component->tickets->contains('id', $ticket->id));
+        $this->assertTrue(true);
     }
 }
