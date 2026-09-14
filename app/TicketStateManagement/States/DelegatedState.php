@@ -30,7 +30,7 @@ class DelegatedState extends State implements TicketStateInterface
      */
     public function publishToWebService(User $actor): void
     {
-        $this->transition(TicketState::WEBSERVICE, 'Ticket published to web service.', $actor);
+        $this->transition(TicketState::WEBSERVICE, "تیکت شما تایید و جهت تکمیل فرایند به وب سرویس ارسال شد", $actor);
     }
 
     /**

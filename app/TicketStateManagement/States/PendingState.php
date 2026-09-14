@@ -15,7 +15,7 @@ class PendingState extends State implements TicketStateInterface
     public function claim(User $actor): void
     {
         $this->ticket->update(['recipient_id' => $actor->id]);
-        $this->transition(TicketState::ACCEPTED, 'Ticket claimed.', $actor);
+        $this->transition(TicketState::ACCEPTED, "تیکت شما توسط {$actor->name} در حال رسیدگی است", $actor);
     }
 
     /**

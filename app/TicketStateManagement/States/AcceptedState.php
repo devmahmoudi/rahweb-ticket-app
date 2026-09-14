@@ -23,7 +23,7 @@ class AcceptedState extends State implements TicketStateInterface
     public function delegateTo(User $actor, User $target): void
     {
         $this->ticket->update(['recipient_id' => $target->id]);
-        $this->transition(TicketState::DELEGATED, "Ticket delegated to {$target->name}.", $actor);
+        $this->transition(TicketState::DELEGATED, "تیکت شما تایید و به  {$target->name} منتقل شده است.", $actor);
     }
 
     /**

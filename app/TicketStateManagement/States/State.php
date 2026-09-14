@@ -40,7 +40,7 @@ abstract class State
                 ->update(['status' => ChatUserConnectionStatus::BLOCKED->value]);
         }
 
-        $this->transition(TicketState::REJECTED, 'Ticket rejected.');
+        $this->transition(TicketState::REJECTED, 'تیکت شما رد شد');
     }
 
     protected function unsupported(string $transition): never
