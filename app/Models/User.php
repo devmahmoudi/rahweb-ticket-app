@@ -6,7 +6,6 @@ namespace App\Models;
 use App\Enums\User\UserType;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -80,16 +79,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function media(): HasMany
     {
         return $this->hasMany(Media::class);
-    }
-
-    /**
-     * Customer record of this user if its type is customer and customer_id not null
-     *
-     * @return BelongsTo
-     */
-    public function customer(): BelongsTo
-    {
-        return $this->belongsTo(Customer::class);
     }
 
     /**

@@ -33,4 +33,19 @@ class RegistrationTest extends TestCase
 
         $this->assertAuthenticated();
     }
+
+    public function test_new_users_are_auto_verified_when_mail_is_not_configured(): void
+    {
+        config()->set('mail.default', 'log');
+
+        $component = Volt::test('pages.auth.register')
+            ->set('name', 'Test User')
+            ->set('email', 'test@example.com')
+            ->set('password', 'password')
+            ->set('password_confirmation', 'password');
+
+        $component->call('register');
+
+        $this->assertNotNull(auth()->user()->email_verified_at);
+    }
 }
