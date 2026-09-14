@@ -40,11 +40,4 @@ class ChatRepository
 
         $chat->save();
     }
-
-    public function kickMember(Chat $chat, User $member):void
-    {
-        $chat->members()->detach($member->id);
-
-        $chat->save();
-    }
 }
