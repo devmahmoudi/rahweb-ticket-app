@@ -15,7 +15,7 @@
                 \App\TicketStateManagement\TicketState::REJECTED->value => 'رد شده',
             ];
             $ticketStateCounts = array_map(
-                fn (string $state) => \App\Facades\TicketRepositoryFacade::count(TicketState: $state),
+                fn (string $state) => \App\Models\Ticket::state(\App\TicketStateManagement\TicketState::from($state))->count(),
                 array_keys($ticketStateLabels),
             );
         @endphp
