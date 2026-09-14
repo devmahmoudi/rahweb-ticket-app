@@ -6,7 +6,6 @@ use App\Enums\User\UserType;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use App\Models\Workgroup;
-use App\Repositories\WorkgroupRepository;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -65,9 +64,9 @@ class Create extends Component
         $this->authorize('create', User::class);
     }
 
-    public function render(WorkgroupRepository $workgroupRepository)
+    public function render()
     {
         return view('livewire.pages.operator.create')
-            ->with('workgroups', $workgroupRepository->all(['id', 'name']));
+            ->with('workgroups', Workgroup::get(['id', 'name']));
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Livewire\Workgroup;
 
 use App\Models\Workgroup;
-use App\Repositories\WorkgroupRepository;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
@@ -16,9 +15,7 @@ class Create extends Component
     {
         $this->validate();
 
-        $repository = app()->make(WorkgroupRepository::class);
-
-        if(! $repository->store($this->only(['name']))){
+        if(! Workgroup::create($this->only(['name']))){
             session()->now('alert-danger', 'وجود خطا در سرور');
 
             return;

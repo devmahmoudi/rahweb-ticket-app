@@ -4,7 +4,6 @@ namespace App\Livewire\Ticket;
 
 use App\Models\Ticket;
 use App\Models\Workgroup;
-use App\Repositories\WorkgroupRepository;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -13,8 +12,6 @@ use Livewire\WithFileUploads;
 class Create extends Component
 {
     use WithFileUploads;
-
-    private WorkgroupRepository $workgroupRepository;
 
     #[Validate(['required', 'max:255', 'string'])]
     public string $title;
@@ -30,8 +27,6 @@ class Create extends Component
 
     public function __construct()
     {
-        $this->workgroupRepository = app()->make(WorkgroupRepository::class);
-
     }
 
     public function store()
@@ -63,6 +58,6 @@ class Create extends Component
     public function render()
     {
         return view('livewire.pages.ticket.create')
-            ->with('workgroups', $this->workgroupRepository->all());
+            ->with('workgroups', Workgroup::all());
     }
 }

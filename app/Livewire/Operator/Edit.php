@@ -4,7 +4,6 @@ namespace App\Livewire\Operator;
 
 use App\Models\User;
 use App\Models\Workgroup;
-use App\Repositories\WorkgroupRepository;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -55,9 +54,9 @@ class Edit extends Component
 
     }
 
-    public function render(WorkgroupRepository $workgroupRepository)
+    public function render()
     {
         return view('livewire.pages.operator.edit')
-            ->with('workgroups', $workgroupRepository->all(['id', 'name']));
+            ->with('workgroups', Workgroup::all(['id', 'name']));
     }
 }
