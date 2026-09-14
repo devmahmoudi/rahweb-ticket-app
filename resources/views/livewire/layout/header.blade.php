@@ -8,16 +8,6 @@
                     <div>داشبورد</div>
                 </a>
             </li>
-            <!-- Role -->
-            @can('viewAny', \App\Models\Role::class)
-                <li @class(['menu-item', 'active' => (\Illuminate\Support\Str::startsWith(request()->getRequestUri(), '/role'))])>
-                    <a  href="{{ route('role.index') }}" class="menu-link">
-                        <i class='menu-icon bx bx-universal-access'></i>
-                        <div>نقش ها</div>
-                    </a>
-                </li>
-            @endcan
-
         <!-- Workgroup -->
             @can('viewAny', \App\Models\Workgroup::class)
                 <li @class(['menu-item', 'active' => (\Illuminate\Support\Str::startsWith(request()->getRequestUri(), '/workgroup'))])>

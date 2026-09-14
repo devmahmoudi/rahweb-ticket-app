@@ -2,9 +2,7 @@
 
 namespace App\Policies;
 
-use App\Enums\Permission\BasicPermission;
 use App\Enums\Ticket\TicketStatus;
-use App\Enums\User\UserType;
 use App\Models\Ticket;
 use App\Models\User;
 
@@ -18,18 +16,10 @@ class TicketPolicy
         if($user->isCustomer())
             return true;
 
-        if($user->isAdmin())
+        if($user->isSuperadmin())
             return true;
 
-        if($user->isOperator()){
-            if($role = $user->role)
-            return $role->permissions()
-                ->where("name", BasicPermission::READ->value)
-                ->where('model', Ticket::class)
-                ->exists();
-        }
-
-        return false;
+        return $user->isOperator();
     }
 
     /**
@@ -40,17 +30,10 @@ class TicketPolicy
         if($user->isCustomer())
             return $ticket->user_id == $user->id;
 
-        if($user->isAdmin())
+        if($user->isSuperadmin())
             return true;
 
-        if($user->isOperator()){
-            return
-                $ticket->recipient_id == $user->id ||
-                $ticket->status == TicketStatus::WAITING->value;
-
-        }
-
-        return false;
+        return $user->isOperator() && ($ticket->recipient_id == $user->id || $ticket->status == TicketStatus::WAITING->value);
     }
 
     /**
@@ -61,13 +44,7 @@ class TicketPolicy
         if($user->isCustomer())
             return true;
 
-        if($user->isAdmin())
-            return false;
-
-        if($user->isOperator())
-            return false;
-
-        return false;
+        return $user->isSuperadmin() || $user->isCustomer();
     }
 
     /**
@@ -78,13 +55,10 @@ class TicketPolicy
         if($user->isCustomer())
             return $ticket->user_id == $user->id;
 
-        if($user->isAdmin())
+        if($user->isSuperadmin())
             return true;
 
-        if($user->isOperator())
-            return false;
-
-        return false;
+        return $user->isOperator() && $ticket->recipient_id == $user->id;
     }
 
     /**
@@ -96,7 +70,7 @@ class TicketPolicy
             return false;
         }
 
-        return $user->isAdmin() || $ticket->recipient_id === $user->id;
+        return $user->isSuperadmin() || $ticket->recipient_id === $user->id;
     }
 
     /**
@@ -107,7 +81,7 @@ class TicketPolicy
         if($user->isCustomer())
             return $user->customer and $ticket->customer_id == $user->customer->id;
 
-        if($user->isAdmin())
+        if($user->isSuperadmin())
             return true;
 
         if($user->isOperator())
@@ -124,17 +98,10 @@ class TicketPolicy
         if($user->isCustomer())
             return false;
 
-        if($user->isAdmin())
+        if($user->isSuperadmin())
             return true;
 
-        if($user->isOperator()){
-            return $user->role->permissions()
-                ->where("name", BasicPermission::UPDATE->value)
-                ->where('model', Ticket::class)
-                ->exists();
-        }
-
-        return false;
+        return $user->isOperator() && $ticket->recipient_id == $user->id;
     }
 
     /**
@@ -145,18 +112,8 @@ class TicketPolicy
         if($user->isCustomer())
             return false;
 
-        if($user->isAdmin())
+        if($user->isSuperadmin())
             return true;
-
-        if($user->isOperator()){
-            return
-                $user->role->permissions()
-                    ->where("name", BasicPermission::DELETE->value)
-                    ->where('model', Ticket::class)
-                    ->exists()
-                and
-                $ticket->type != UserType::ADMIN->value;
-        }
 
         return false;
     }

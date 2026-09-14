@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
            return
                $user->type == UserType::OPERATOR->value
                or
-               $user->type == UserType::ADMIN->value;
+               $user->type == UserType::SUPERADMIN->value;
         });
 
         app()->singleton('ticket-repository', fn($app) => $app->make(\App\Repositories\TicketRepository::class));

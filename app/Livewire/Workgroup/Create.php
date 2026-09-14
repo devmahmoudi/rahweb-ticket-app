@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Workgroup;
 
-use App\Models\Role;
 use App\Models\Workgroup;
 use App\Repositories\WorkgroupRepository;
 use Livewire\Attributes\Validate;
@@ -19,7 +18,7 @@ class Create extends Component
 
         $repository = app()->make(WorkgroupRepository::class);
 
-        if(! $role = $repository->store($this->only(['name']))){
+        if(! $repository->store($this->only(['name']))){
             session()->now('alert-danger', 'وجود خطا در سرور');
 
             return;

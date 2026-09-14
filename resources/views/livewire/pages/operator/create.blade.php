@@ -46,20 +46,6 @@
                 @enderror
             </div>
             <div class="form-group p-3">
-                <label for="defaultFormControlInput" class="form-label">نقش اوپراتور</label>
-                <div wire:ignore>
-                    <select id="role" value="{{ $role_id }}">
-                        <option value="">نقش اوپراتور</option>
-                        @foreach($roles as $role)
-                            <option value="{{ $role->id }}" @selected($role->id == $role_id)>{{ $role->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                @error('role_id')
-                <small class="text-danger text-sm">{{ $message }}</small>
-                @enderror
-            </div>
-            <div class="form-group p-3">
                 <button class="btn btn-success" type="submit">ذخیره</button>
                 <a class="btn btn-warning" href="{{ route('operator.index') }}">بازگشت</a>
             </div>
@@ -75,11 +61,6 @@
         @this.set('workgroup_ids', workgroups.val())
     })
 
-    let role_id = $('#role').select2()
-
-    role_id.on('change', function (e) {
-        @this.set('role_id', role_id.val())
-    })
 </script>
 @endscript
 
