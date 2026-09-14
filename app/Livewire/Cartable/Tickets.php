@@ -4,7 +4,6 @@ namespace App\Livewire\Cartable;
 
 use App\Models\Ticket;
 use App\Repositories\TicketRepository;
-use App\TicketStateManagement\TicketState;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -19,7 +18,6 @@ class Tickets extends Component
 
         foreach (auth()->user()->workgroups as $workgroup){
             $listeners["echo-private:workgroup.{$workgroup->id},NewTicket"] = 'newTicket';
-            $listeners["echo-private:workgroup.{$workgroup->id},TicketAccepted"] = 'removeTicket';
         }
 
         $listeners["echo-private:user." . auth()->id() . ",NewTicket"] = 'newTicket';
@@ -61,7 +59,7 @@ class Tickets extends Component
     public function open(Ticket $ticket)
     {
         if(!$ticket->recipient_id){
-            $this->accept($ticket);
+            app(TicketRepository::class)->accept($ticket);
         }
 
         if($ticket->recipient_id == auth()->id()){
@@ -71,32 +69,12 @@ class Tickets extends Component
         }
     }
 
-    /**
-     * Accept ticket for handling and chat with ticket owner
-     *
-     * @param Ticket $ticket
-     * @return void
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     */
-    public function accept(Ticket $ticket)
-    {
-        $lock = cache()->lock(config('ticket.accept-cache-lock-prefix') . $ticket->id, 2)->block(2, function() use ($ticket){
-            $ticket->fresh();
-
-            if($ticket->status == TicketState::PENDING->value){
-                $repository = app()->make(TicketRepository::class);
-
-                $repository->accept($ticket);
-            }
-        });
-    }
-
     public function mount(TicketRepository $ticketRepository)
     {
         $this->authorize('viewAny', Ticket::class);
 
         $this->tickets =
-            $ticketRepository->pendingTickets(false)
+            $ticketRepository->cartableTickets(false)
                 ->sortByDesc('created_at');
 
     }

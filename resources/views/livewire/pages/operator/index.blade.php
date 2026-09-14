@@ -15,7 +15,6 @@
                     <th>#</th>
                     <th>نام</th>
                     <th>ایمیل</th>
-                    <th>نقش</th>
                     <th>عمل‌ها</th>
                 </tr>
                 </thead>
@@ -25,7 +24,6 @@
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
-                        <td>{{ $user->role->name }}</td>
                         <td>
                             <div class="dropdown">
                                 <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">

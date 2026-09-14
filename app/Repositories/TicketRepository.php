@@ -2,12 +2,11 @@
 
 namespace App\Repositories;
 
-use App\Events\TicketAccepted;
 use App\Models\Chat;
+use App\Models\Scopes\TicketUserTypeScope;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Repositories\Chat\ChatRepository;
-use App\Repositories\Message\MessageRepository;
 use App\TicketStateManagement\TicketState;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -39,9 +38,21 @@ class TicketRepository
             $query->get();
     }
 
+    public function cartableTickets(bool $pagination = true, ?int $perpage = 10):mixed
+    {
+        $query = Ticket::where('status', TicketState::PENDING->value)->orWhere('recipient_id', auth()->id());
+
+
+        return $pagination ?
+            $query->paginate($perpage) :
+            $query->get();
+    }
+
     public function getWithStatusScope(string $status, bool $pagination = true, ?int $perpage = 10):mixed
     {
         $query = Ticket::where('status', $status);
+
+        dd($query->withoutGlobalScope(TicketUserTypeScope::class)->get());
 
         return $pagination ?
             $query->paginate($perpage) :
@@ -82,28 +93,30 @@ class TicketRepository
      */
     public function accept(Ticket $ticket, ?User $acceptable = null):bool
     {
-        DB::beginTransaction();
+        return cache()->lock(config('ticket.accept-cache-lock-prefix') . $ticket->id, 2)->block(2, function () use ($ticket, $acceptable): bool {
+            $ticket->refresh();
 
-        if(!$this->update($ticket,
-            [
-                'status' => TicketState::PENDING->value,
-                'recipient_id' => $acceptable ?? auth()->id()
-            ]
-        ))
-            return false;
+            if ($ticket->status !== TicketState::PENDING->value) {
+                return false;
+            }
 
-        if(!$chat = $this->findRelevantChat($ticket))
-            return false;
+            DB::beginTransaction();
 
-        $chatRepository = app()->make(ChatRepository::class);
+            $recipient = $acceptable ?? auth()->user();
 
-        $chatRepository->joinMember($chat, $acceptable ?? auth()->user());
+            $ticket->stateManagement()->claim($recipient);
 
-        DB::commit();
+            if (!$chat = $this->findRelevantChat($ticket)) {
+                DB::rollBack();
+                return false;
+            }
 
-        broadcast(new TicketAccepted($ticket))->toOthers();
+            app(ChatRepository::class)->joinMember($chat, $recipient);
 
-        return true;
+            DB::commit();
+
+            return true;
+        });
     }
 
     public function findRelevantChat(Ticket $ticket):Chat|null

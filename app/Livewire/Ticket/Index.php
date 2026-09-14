@@ -24,32 +24,13 @@ class Index extends Component
 
     public function openChat(Ticket $ticket)
     {
-        if($ticket->user_id != auth()->id())
-            $this->accept($ticket);
+        if ($ticket->user_id != auth()->id()) {
+            $this->ticketRepository->accept($ticket);
+        }
 
         $repository = app()->make(TicketRepository::class);
 
         $this->redirect(route('chat', $repository->findRelevantChat($ticket)));
-    }
-
-    /**
-     * Accept ticket for handling and chat with ticket owner
-     *
-     * @param Ticket $ticket
-     * @return void
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     */
-    public function accept(Ticket $ticket)
-    {
-        $lock = cache()->lock(config('ticket.accept-cache-lock-prefix') . $ticket->id, 2)->block(2, function() use ($ticket){
-            $ticket->fresh();
-
-            if($ticket->status == TicketState::PENDING->value){
-                $repository = app()->make(TicketRepository::class);
-
-                $repository->accept($ticket);
-            }
-        });
     }
 
     public function delete(Ticket $ticket)
