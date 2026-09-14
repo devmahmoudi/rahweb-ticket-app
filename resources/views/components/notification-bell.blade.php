@@ -15,6 +15,11 @@
                     <div>
                         <div class="fw-semibold">{{ $notification->data['title'] ?? 'اعلان' }}</div>
                         <div class="small text-muted mt-1">{{ $notification->data['message'] ?? '' }}</div>
+                        @if(! empty($notification->data['link']))
+                            <a href="{{ $notification->data['link'] }}" class="small text-primary mt-1 d-inline-block">
+                                {{ $notification->data['link_text'] ?? 'مشاهده' }}
+                            </a>
+                        @endif
                     </div>
 
                     <form method="POST" action="{{ route('notifications.read', $notification->id) }}">

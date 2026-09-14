@@ -11,6 +11,9 @@ User can mark each notification as read.
 The [NotificationBell](../app/View/Components/NotificationBell.php) component contains a link for see all notifications.
 The link redirects user to [Notification List](../app/Livewire/Notification/Index.php) and this page, user can see all its notifications.
 
+## Available Notifications
+- [SendTicketToWebServiceJobSucceed](../app/Notifications/SendTicketToWebserviceJobSucceed.php)
+
 ## Acceptance & Criteria
 - [NotificationBell](../app/View/Components/NotificationBell.php) should render in [Layout Header](../resources/views/livewire/layout/header.blade.php)
 - [NotificationBell](../app/View/Components/NotificationBell.php) should display user unread notifications list
@@ -20,3 +23,4 @@ The link redirects user to [Notification List](../app/Livewire/Notification/Inde
 - [NotificationBell](../app/View/Components/NotificationBell.php) should contain a link for see all notifications
 - After click on see all notifications, user should redirect to [Notification List](../app/Livewire/Notification/Index.php)
 - [Notification List](../app/Livewire/Notification/Index.php) should display all user notifications with pagination, filter and mark as read option
+- [SendTicketToWebServiceJobSucceed](../app/Notifications/SendTicketToWebserviceJobSucceed.php) should display with proper title and message and in its message should be existed link of correspond ticket

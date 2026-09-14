@@ -37,10 +37,14 @@ class SendTicketToWebserviceJobSucceed extends Notification
      */
     public function toArray(object $notifiable): array
     {
+        $chat = $this->ticket->chat();
+
         return [
             'ticket_id' => $this->ticket->id,
             'title' => 'تیکت #' . $this->ticket->id,
             'message' => 'تیکت شما با موفقیت به وب سرویس ارسال شد.',
+            'link' => $chat ? route('chat', $chat) : route('ticket.index'),
+            'link_text' => 'مشاهده تیکت',
         ];
     }
 }

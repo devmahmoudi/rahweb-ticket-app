@@ -15,6 +15,11 @@
                     <div>
                         <div class="fw-semibold">{{ $notification->data['title'] ?? 'اعلان' }}</div>
                         <div class="text-muted mt-1">{{ $notification->data['message'] ?? '' }}</div>
+                        @if(! empty($notification->data['link']))
+                            <a href="{{ $notification->data['link'] }}" class="text-primary mt-2 d-inline-block">
+                                {{ $notification->data['link_text'] ?? 'مشاهده' }}
+                            </a>
+                        @endif
                     </div>
 
                     @if(is_null($notification->read_at))
