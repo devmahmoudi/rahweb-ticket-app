@@ -7,6 +7,7 @@ use App\Notifications\SendTicketToWebserviceJobSucceed;
 use App\Repositories\WebService\WebServiceRepository;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use RuntimeException;
 
@@ -32,10 +33,14 @@ class SendTicketToWebservice implements ShouldQueue
         $response = $repository->sendTicket($this->ticket);
 
         if (! $response->successful()) {
-            throw new RuntimeException(sprintf(
+            $errorMessage = (sprintf(
                 'Webservice request failed for ticket #%d.',
                 $this->ticket->id,
             ));
+
+            Log::error($errorMessage);
+
+            throw new RuntimeException($errorMessage);
         }
 
         $targets = collect([
