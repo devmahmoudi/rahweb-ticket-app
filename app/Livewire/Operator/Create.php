@@ -4,6 +4,7 @@ namespace App\Livewire\Operator;
 
 use App\Enums\User\UserType;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use App\Models\Workgroup;
 use App\Repositories\UserRepository;
 use App\Repositories\WorkgroupRepository;
@@ -39,12 +40,25 @@ class Create extends Component
 
         $this->password = Hash::make($this->password);
 
-        ($user = $repository->create($this->only(['email', 'name', 'password']))) &&
-        $user->workgroups()->sync($this->workgroup_ids) ?
-            session()->flash('alert-success', 'اوپراتور جدید ایجاد شد !'):
-            session()->flash('alert-danger', 'وجود خطا در سرور');
+        $mailConfigured = config('mail.default') !== 'log';
 
+        $user = $repository->create(array_merge(
+            $this->only(['email', 'name', 'password']),
+            ['type' => UserType::CUSTOMER->value]
+        ));
+
+        if (! $mailConfigured) {
+            $user->forceFill([
+                'email_verified_at' => now(),
+            ])->save();
+        } else {
+            event(new Registered($user));
+        }
+
+        $user->workgroups()->sync($this->workgroup_ids);
         $repository->update($user, ['type' => UserType::OPERATOR->value]);
+
+        session()->flash('alert-success', 'اوپراتور جدید ایجاد شد !');
 
         $this->redirect(route('operator.index'));
     }
