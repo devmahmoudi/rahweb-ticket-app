@@ -15,4 +15,4 @@ For retry the failed jobs, a [Schedule](../routes/console.php) should execute co
 - [SendTicketToWebserviceJobSucceed](../app/Notifications/SendTicketToWebserviceJobSucceed.php) should send to ticket owner and recipient if [SendTicketToWebserivce](../app/Jobs/SendTicketToWebservice.php) job succeed
 - [SendTicketToWebserivce](../app/Jobs/SendTicketToWebservice.php) job should store in the failed jobs table if failed
 - [Schedule](../routes/console.php) should retry for field jobs with queue name **webservice** every one hour
-- [SendTicketToWebserivce](../app/Jobs/SendTicketToWebservice.php) should use [WebServiceRepository](../app/Repositories/Ticket/WebServiceRepository.php) instance for send request
+- [SendTicketToWebserivce](../app/Jobs/SendTicketToWebservice.php) should use [WebServiceRepository](../app/Repositories/WebService/WebServiceRepository.php) instance for send request

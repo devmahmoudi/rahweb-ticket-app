@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Ticket;
+namespace App\Repositories\WebService;
 
 use App\Models\Ticket;
 use Illuminate\Http\Client\Response;
