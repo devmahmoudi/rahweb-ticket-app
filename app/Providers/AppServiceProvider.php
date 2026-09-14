@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Enums\User\UserType;
 use App\Models\User;
+use App\Repositories\Ticket\FakeWebServiceRepository;
+use App\Repositories\Ticket\WebServiceRepository;
 use App\TicketStateManagement\States\AcceptedState;
 use App\TicketStateManagement\States\DelegatedState;
 use App\TicketStateManagement\States\PendingState;
@@ -22,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
         foreach ([PendingState::class, AcceptedState::class, DelegatedState::class, WebserviceState::class, RejectedState::class] as $state) {
             $this->app->bind($state, fn ($app, array $parameters) => new $state($parameters['ticket']));
         }
+
+        $this->app->bind(WebServiceRepository::class, FakeWebServiceRepository::class);
     }
 
     /**
