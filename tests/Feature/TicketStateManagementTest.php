@@ -4,14 +4,22 @@ namespace Tests\Feature;
 
 use App\Enums\Chat\ChatUserConnectionStatus;
 use App\Events\TicketStateChanged;
+use App\Jobs\SendTicketToWebservice;
 use App\Livewire\Ticket\Index;
 use App\Models\Chat;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Repositories\Ticket\WebServiceRepository;
 use App\TicketStateManagement\TicketState;
+use GuzzleHttp\Psr7\Response as Psr7Response;
+use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
 use LogicException;
+use RuntimeException;
 use Tests\TestCase;
 
 class TicketStateManagementTest extends TestCase
@@ -49,6 +57,7 @@ class TicketStateManagementTest extends TestCase
 
     public function test_delegated_ticket_can_be_published(): void
     {
+        Queue::fake();
         Event::fake();
         $actor = User::factory()->superadmin()->create();
         $ticket = Ticket::factory()->create(['status' => TicketState::DELEGATED->value]);
@@ -82,6 +91,75 @@ class TicketStateManagementTest extends TestCase
             'body' => 'تیکت شما رد شد',
         ]);
         Event::assertDispatched(TicketStateChanged::class);
+    }
+
+    public function test_delegated_ticket_dispatches_webservice_job_with_webservice_queue(): void
+    {
+        Queue::fake();
+        $actor = User::factory()->superadmin()->create();
+        $ticket = Ticket::factory()->create(['status' => TicketState::DELEGATED->value]);
+
+        $ticket->stateManagement()->publishToWebService($actor);
+
+        Queue::assertPushedOn('webservice', SendTicketToWebservice::class, function ($job) use ($ticket) {
+            return $job->ticket->id === $ticket->id;
+        });
+    }
+
+    public function test_webservice_job_handles_successful_response_without_throwing(): void
+    {
+        $owner = User::factory()->customer()->create();
+        $ticket = Ticket::factory()->create([
+            'status' => TicketState::DELEGATED->value,
+            'user_id' => $owner->id,
+        ]);
+
+        $this->app->instance(WebServiceRepository::class, new class implements WebServiceRepository
+        {
+            public function sendTicket(Ticket $ticket): Response
+            {
+                $psrResponse = new Psr7Response(200, [], json_encode([
+                    'ticket_id' => $ticket->id,
+                    'status' => 'succeed',
+                ]));
+
+                return new Response($psrResponse);
+            }
+        });
+
+        $job = new SendTicketToWebservice($ticket);
+
+        $job->handle(app(WebServiceRepository::class));
+
+        $this->assertTrue(true);
+    }
+
+    public function test_webservice_job_throws_when_repository_returns_unsuccessful_response(): void
+    {
+        Notification::fake();
+        $ticket = Ticket::factory()->create(['status' => TicketState::DELEGATED->value]);
+
+        $this->app->instance(WebServiceRepository::class, new class implements WebServiceRepository
+        {
+            public function sendTicket(Ticket $ticket): Response
+            {
+                return new Response(new Psr7Response(500, [], json_encode([
+                    'message' => 'Unavailable',
+                ])));
+            }
+        });
+
+        $job = new SendTicketToWebservice($ticket);
+
+        $this->expectException(RuntimeException::class);
+        $job->handle(app(WebServiceRepository::class));
+    }
+
+    public function test_webservice_retry_schedule_is_registered_hourly(): void
+    {
+        Artisan::call('schedule:list');
+
+        $this->assertStringContainsString('queue:retry --queue=webservice', Artisan::output());
     }
 
     public function test_each_state_rejects_unsupported_transitions(): void
