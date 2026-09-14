@@ -62,32 +62,32 @@ class TicketAssignmentTest extends TestCase
         );
     }
 
-    public function test_only_the_current_recipient_and_admin_can_assign_open_tickets(): void
+    public function test_only_the_current_recipient_and_superadmin_can_assign_open_tickets(): void
     {
         $recipient = User::factory()->operator()->create();
         $otherOperator = User::factory()->operator()->create();
-        $admin = User::factory()->admin()->create();
+        $superadmin = User::factory()->superadmin()->create();
         $ticket = Ticket::factory()->pending()->operator($recipient)->create();
 
         $this->assertTrue($recipient->can('assign', $ticket));
-        $this->assertTrue($admin->can('assign', $ticket));
+        $this->assertTrue($superadmin->can('assign', $ticket));
         $this->assertFalse($otherOperator->can('assign', $ticket));
 
         $ticket->update(['status' => TicketStatus::CLOSED->value]);
 
         $this->assertFalse($recipient->can('assign', $ticket));
-        $this->assertFalse($admin->can('assign', $ticket));
+        $this->assertFalse($superadmin->can('assign', $ticket));
     }
 
-    public function test_assignment_target_must_be_another_operator_or_admin(): void
+    public function test_assignment_target_must_be_another_operator(): void
     {
         $recipient = User::factory()->operator()->create();
         $ticket = Ticket::factory()->pending()->operator($recipient)->create();
         $customer = User::factory()->customer()->create();
         $newOperator = User::factory()->operator()->create();
 
-        $admin = User::factory()->admin()->create();
-        $this->actingAs($admin);
+        $superadmin = User::factory()->superadmin()->create();
+        $this->actingAs($superadmin);
 
         $component = app(Assignment::class);
         $component->ticketId = $ticket->id;
@@ -117,7 +117,7 @@ class TicketAssignmentTest extends TestCase
         Event::fakeExcept(['eloquent.updated: ' . Ticket::class]);
 
         $recipient = User::factory()->operator()->create();
-        $target = User::factory()->admin()->create();
+        $target = User::factory()->operator()->create();
         $ticket = Ticket::factory()->pending()->operator($recipient)->create();
 
         $ticket->update(['recipient_id' => $target->id]);
@@ -134,7 +134,7 @@ class TicketAssignmentTest extends TestCase
     {
         Event::fakeExcept(['eloquent.updated: ' . Ticket::class]);
 
-        $assigner = User::factory()->admin()->create();
+        $assigner = User::factory()->superadmin()->create();
         $recipient = User::factory()->operator()->create();
         $target = User::factory()->operator()->create();
         $ticket = Ticket::factory()->pending()->operator($recipient)->create();
@@ -167,7 +167,7 @@ class TicketAssignmentTest extends TestCase
 
         $this->assertSame("private-workgroup.{$ticket->workgroup_id}", $workgroupChannel->name);
 
-        $target = User::factory()->admin()->create();
+        $target = User::factory()->operator()->create();
         $ticket->update(['recipient_id' => $target->id, 'status' => TicketStatus::PENDING->value]);
         $userChannel = (new NewTicket($ticket))->broadcastOn()[0];
 
@@ -176,10 +176,10 @@ class TicketAssignmentTest extends TestCase
 
     public function test_both_ticket_lists_render_assignment_button_only_when_authorized(): void
     {
-        $admin = User::factory()->admin()->create();
-        $ticket = Ticket::factory()->pending()->operator($admin)->create();
+        $superadmin = User::factory()->superadmin()->create();
+        $ticket = Ticket::factory()->pending()->operator($superadmin)->create();
 
-        $this->actingAs($admin);
+        $this->actingAs($superadmin);
 
         Livewire::test(Index::class)
             ->set('status', TicketStatus::PENDING->value)
@@ -203,7 +203,7 @@ class TicketAssignmentTest extends TestCase
 
     public function test_cartable_listens_on_the_authenticated_user_channel_and_refreshes(): void
     {
-        $target = User::factory()->admin()->create();
+        $target = User::factory()->superadmin()->create();
         $ticket = Ticket::factory()->pending()->operator($target)->create();
 
         $this->actingAs($target);

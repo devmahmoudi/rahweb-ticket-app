@@ -12,7 +12,7 @@ class WorkgroupPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->isSuperadmin();
+        return $user->isSuperadmin();
     }
 
     /**
@@ -20,7 +20,7 @@ class WorkgroupPolicy
      */
     public function view(User $user, Workgroup $workgroup): bool
     {
-        return $user->isAdmin() || $user->isSuperadmin();
+        return $user->isSuperadmin();
     }
 
     /**
@@ -28,7 +28,7 @@ class WorkgroupPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isAdmin() || $user->isSuperadmin();
+        return $user->isSuperadmin();
     }
 
     /**
@@ -36,7 +36,7 @@ class WorkgroupPolicy
      */
     public function update(User $user, Workgroup $workgroup): bool
     {
-        return $user->isAdmin() || $user->isSuperadmin();
+        return $user->isSuperadmin();
     }
 
     /**
@@ -44,7 +44,7 @@ class WorkgroupPolicy
      */
     public function delete(User $user, Workgroup $workgroup): bool
     {
-        return $user->isAdmin() || $user->isSuperadmin();
+        return $user->isSuperadmin();
     }
 
     /**
@@ -52,7 +52,7 @@ class WorkgroupPolicy
      */
     public function restore(User $user, Workgroup $workgroup): bool
     {
-        return $user->isAdmin() || $user->isSuperadmin();
+        return $user->isSuperadmin();
     }
 
     /**
@@ -60,6 +60,6 @@ class WorkgroupPolicy
      */
     public function forceDelete(User $user, Workgroup $workgroup): bool
     {
-        return $user->isAdmin() || $user->isSuperadmin();
+        return $user->isSuperadmin();
     }
 }

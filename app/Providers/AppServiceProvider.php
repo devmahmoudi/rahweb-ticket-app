@@ -26,8 +26,6 @@ class AppServiceProvider extends ServiceProvider
            return
                $user->type == UserType::OPERATOR->value
                or
-               $user->type == UserType::ADMIN->value
-               or
                $user->type == UserType::SUPERADMIN->value;
         });
 

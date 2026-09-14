@@ -45,12 +45,6 @@ class UserRepository
             ->get();
     }
 
-    public function allAdmins():Collection
-    {
-        return User::where('type', UserType::ADMIN->value)
-            ->get();
-    }
-
     public function allCustomers(bool $pagination = false, int $perPage = 20):mixed
     {
         $query =  User::where('type', UserType::CUSTOMER->value);

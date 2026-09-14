@@ -29,7 +29,7 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'type' => UserType::ADMIN->value,
+            'type' => UserType::SUPERADMIN->value,
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
@@ -68,12 +68,12 @@ class UserFactory extends Factory
 
 
     /**
-     * Indicate admin type for new user.
+    * Indicate superadmin type for new user.
      */
-    public function admin(): static
+    public function superadmin(): static
     {
         return $this->state(fn(array $attributes) => [
-            'type' => UserType::ADMIN->value,
+            'type' => UserType::SUPERADMIN->value,
         ]);
     }
 }

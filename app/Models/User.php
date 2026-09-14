@@ -102,36 +102,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(Chat::class);
     }
 
-    /**
-     * Check that user type is admin or no
-     *
-     * @return bool
-     */
-    public function isAdmin():bool
-    {
-        return $this->type == UserType::ADMIN->value;
-    }
-
     public function isSuperadmin(): bool
     {
         return $this->type == UserType::SUPERADMIN->value;
     }
 
-    /**
-     * Check that customer type is admin or no
-     *
-     * @return bool
-     */
     public function isCustomer():bool
     {
         return $this->type == UserType::CUSTOMER->value;
     }
 
-    /**
-     * Check that operator type is admin or no
-     *
-     * @return bool
-     */
     public function isOperator():bool
     {
         return $this->type == UserType::OPERATOR->value;

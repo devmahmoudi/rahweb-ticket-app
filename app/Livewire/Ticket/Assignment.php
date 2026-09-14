@@ -44,7 +44,7 @@ class Assignment extends Component
 
         $target = User::query()
             ->whereKey($this->userId)
-            ->whereIn('type', [UserType::OPERATOR->value, UserType::ADMIN->value])
+            ->whereIn('type', [UserType::OPERATOR->value, UserType::SUPERADMIN->value])
             ->firstOrFail();
 
         if ($target->id === $ticket->recipient_id) {
@@ -64,7 +64,7 @@ class Assignment extends Component
     public function render()
     {
         $users = User::query()
-            ->whereIn('type', [UserType::OPERATOR->value, UserType::ADMIN->value])
+            ->whereIn('type', [UserType::OPERATOR->value, UserType::SUPERADMIN->value])
             ->where('id', '!=', auth()->id())
             ->orderBy('name')
             ->get();

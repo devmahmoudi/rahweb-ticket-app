@@ -16,7 +16,7 @@ class UserPolicy
         if($user->isCustomer())
             return false;
 
-        if($user->isAdmin() || $user->isSuperadmin())
+        if($user->isSuperadmin())
             return true;
 
         return $user->isOperator();
@@ -30,7 +30,7 @@ class UserPolicy
         if($user->isCustomer())
             return $target->id == $user->id;
 
-        if($user->isAdmin() || $user->isSuperadmin())
+        if($user->isSuperadmin())
             return true;
 
         return $user->isOperator()
@@ -48,7 +48,7 @@ class UserPolicy
         if($user->isCustomer())
             return false;
 
-        return $user->isAdmin() || $user->isSuperadmin();
+        return $user->isSuperadmin();
     }
 
     /**
@@ -59,7 +59,7 @@ class UserPolicy
         if($user->isCustomer())
             return false;
 
-        if($user->isAdmin() || $user->isSuperadmin())
+        if($user->isSuperadmin())
             return true;
 
         return false;
@@ -73,7 +73,7 @@ class UserPolicy
         if($user->isCustomer())
             return false;
 
-        if($user->isAdmin() || $user->isSuperadmin())
+        if($user->isSuperadmin())
             return true;
         return false;
     }
@@ -86,7 +86,7 @@ class UserPolicy
         if($user->isCustomer())
             return false;
 
-        if($user->isAdmin() || $user->isSuperadmin())
+        if($user->isSuperadmin())
             return true;
         return false;
     }
@@ -99,7 +99,7 @@ class UserPolicy
         if($user->isCustomer())
             return false;
 
-        if($user->isAdmin() || $user->isSuperadmin())
+        if($user->isSuperadmin())
             return true;
         return false;
     }

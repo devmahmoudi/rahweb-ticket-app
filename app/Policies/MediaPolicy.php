@@ -15,7 +15,7 @@ class MediaPolicy
         if ($user->isCustomer())
             return false;
 
-        if ($user->isAdmin() || $user->isSuperadmin())
+        if ($user->isSuperadmin())
             return true;
         return $user->isOperator();
     }
@@ -28,7 +28,7 @@ class MediaPolicy
         if ($user->isCustomer())
             return false;
 
-        if ($user->isAdmin() || $user->isSuperadmin())
+        if ($user->isSuperadmin())
             return true;
         return $user->isOperator();
     }
@@ -41,7 +41,7 @@ class MediaPolicy
         if ($user->isCustomer())
             return false;
 
-        if ($user->isAdmin() || $user->isSuperadmin())
+        if ($user->isSuperadmin())
             return true;
         return $user->isOperator();
     }
@@ -54,7 +54,7 @@ class MediaPolicy
         if ($user->isCustomer())
             return false;
 
-        if ($user->isAdmin() || $user->isSuperadmin())
+        if ($user->isSuperadmin())
             return true;
         return $user->isOperator();
     }
@@ -67,7 +67,7 @@ class MediaPolicy
         if ($user->isCustomer())
             return false;
 
-        if ($user->isAdmin() || $user->isSuperadmin())
+        if ($user->isSuperadmin())
             return true;
         return $user->isOperator();
     }

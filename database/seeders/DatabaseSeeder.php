@@ -13,21 +13,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->seedAdminUser();
+        $this->seedSuperadminUser();
 
         $this->seedOperatorUser();
 
         $this->seedCustomerUser();
     }
 
-    private function seedAdminUser(): void
+    private function seedSuperadminUser(): void
     {
-        // create admin user
-        $admin = User::factory()->create([
-            'name' => 'Test Admin',
-            'email' => 'admin@example.com',
+        User::factory()->superadmin()->create([
+            'name' => 'Test Superadmin',
+            'email' => 'superadmin@example.com',
             'password' => Hash::make('123456789'),
-            'type' => \App\Enums\User\UserType::SUPERADMIN->value,
         ]);
     }
 

@@ -7,7 +7,6 @@ We don't need **dynamic** Role Base Access Control for this tiny project that in
 ## Supporting Roles|UserType
 - Customer
 - Operator
-- Admin
 - Superadmin
 
 ## Acceptance & Criteria

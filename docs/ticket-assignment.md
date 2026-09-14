@@ -10,10 +10,10 @@ It is better to dispatch the events in the [TicketObserver](../app/Observers/Tic
 The ticket assignment policy should add in the [TicketPolicy](../app/Policies/TicketPolicy.php) and the assign ticket option button display if the policy @can authorize user.
 
 ## Acceptance & Criteria
-- Only current assignment user and super admin can assign ticket to others
+- Only current assignment user and superadmin can assign ticket to others
 - Assign button should display only to authorized user in [TicketIndex](../app/Livewire/Ticket/Index.php) and [Cartable](../app/Livewire/Cartable/Tickets.php)
 - Target assignment should not equal to current user
-- Target assignment user type should equal to "operator" or "admin"
+- Target assignment user type should equal to "operator"
 - Ticket should be openb
 - [TicketAssignmentChanged](../app/Events/TicketAssigmentChanged.php) should be dispatched by [TicketObserver](../app/Observers/TicketObserver.php) after assignment
 - [NewTicket](../app/Events/NewTicket.php) should be dispatched by [TicketObserver](../app/Observers/TicketObserver.php) after assignment

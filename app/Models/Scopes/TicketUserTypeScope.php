@@ -10,15 +10,13 @@ use Illuminate\Database\Eloquent\Scope;
 
 /**
  * Scoping read tickets according user type.
- * if authenticated user type is admin, he
+ * if authenticated user type is superadmin, they
  * can view all tickets whereas
  * if authenticated user type is customer,
  * he can just view its own tickets.
  * If authenticated user type is operator,
- * he can just view waiting for response and
- * support status tickets and recipient
- * tickets ( tickets that their recipient_id
- * equivalent with authenticated user id)
+ * they can view waiting tickets in their workgroups
+ * and tickets assigned to them.
  */
 class TicketUserTypeScope implements Scope
 {
@@ -27,7 +25,7 @@ class TicketUserTypeScope implements Scope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        if(in_array(auth()->user()->type, [UserType::ADMIN->value, UserType::SUPERADMIN->value]))
+        if(auth()->user()->type == UserType::SUPERADMIN->value)
             return;
 
         elseif(auth()->user()->type == UserType::CUSTOMER->value)

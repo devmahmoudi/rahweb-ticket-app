@@ -16,7 +16,7 @@ class TicketPolicy
         if($user->isCustomer())
             return true;
 
-        if($user->isAdmin() || $user->isSuperadmin())
+        if($user->isSuperadmin())
             return true;
 
         return $user->isOperator();
@@ -30,7 +30,7 @@ class TicketPolicy
         if($user->isCustomer())
             return $ticket->user_id == $user->id;
 
-        if($user->isAdmin() || $user->isSuperadmin())
+        if($user->isSuperadmin())
             return true;
 
         return $user->isOperator() && ($ticket->recipient_id == $user->id || $ticket->status == TicketStatus::WAITING->value);
@@ -55,7 +55,7 @@ class TicketPolicy
         if($user->isCustomer())
             return $ticket->user_id == $user->id;
 
-        if($user->isAdmin() || $user->isSuperadmin())
+        if($user->isSuperadmin())
             return true;
 
         return $user->isOperator() && $ticket->recipient_id == $user->id;
@@ -70,7 +70,7 @@ class TicketPolicy
             return false;
         }
 
-        return $user->isAdmin() || $user->isSuperadmin() || $ticket->recipient_id === $user->id;
+        return $user->isSuperadmin() || $ticket->recipient_id === $user->id;
     }
 
     /**
@@ -81,7 +81,7 @@ class TicketPolicy
         if($user->isCustomer())
             return $user->customer and $ticket->customer_id == $user->customer->id;
 
-        if($user->isAdmin() || $user->isSuperadmin())
+        if($user->isSuperadmin())
             return true;
 
         if($user->isOperator())
@@ -98,7 +98,7 @@ class TicketPolicy
         if($user->isCustomer())
             return false;
 
-        if($user->isAdmin() || $user->isSuperadmin())
+        if($user->isSuperadmin())
             return true;
 
         return $user->isOperator() && $ticket->recipient_id == $user->id;
@@ -112,7 +112,7 @@ class TicketPolicy
         if($user->isCustomer())
             return false;
 
-        if($user->isAdmin() || $user->isSuperadmin())
+        if($user->isSuperadmin())
             return true;
 
         return false;

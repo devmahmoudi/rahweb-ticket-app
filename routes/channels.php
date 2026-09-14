@@ -3,11 +3,8 @@
 use App\Models\User;
 use Illuminate\Support\Facades\Broadcast;
 
-Broadcast::channel('admin', function (User $user){
-   return in_array($user->type, [
-       \App\Enums\User\UserType::ADMIN->value,
-       \App\Enums\User\UserType::SUPERADMIN->value,
-   ]);
+Broadcast::channel('superadmin', function (User $user){
+    return $user->type == \App\Enums\User\UserType::SUPERADMIN->value;
 });
 
 Broadcast::channel('workgroup.{workgroup_id}', function (User $user, int $workgroup_id){
