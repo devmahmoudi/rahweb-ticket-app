@@ -15,7 +15,7 @@ class Chat extends Component
     #[On('open-chat')]
     public function open(int $chatId)
     {
-        $this->chat = Chat::find($chatId);
+        $this->chat = ChatModel::find($chatId);
     }
 
     #[On('notify-online-status')]
