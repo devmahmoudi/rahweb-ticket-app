@@ -26,7 +26,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
-        'role_id',
         'type'
     ];
 
@@ -74,16 +73,6 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * The assigned role for user
-     *
-     * @return BelongsTo
-     */
-    public function role():BelongsTo
-    {
-        return $this->belongsTo(Role::class);
-    }
-
-    /**
      * All media that uploaded with user
      *
      * @return HasMany
@@ -121,6 +110,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isAdmin():bool
     {
         return $this->type == UserType::ADMIN->value;
+    }
+
+    public function isSuperadmin(): bool
+    {
+        return $this->type == UserType::SUPERADMIN->value;
     }
 
     /**

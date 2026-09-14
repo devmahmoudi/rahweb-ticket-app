@@ -2,14 +2,11 @@
 
 namespace App\Livewire\Operator;
 
-use App\Models\Role;
 use App\Models\User;
 use App\Models\Workgroup;
-use App\Repositories\RoleRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\WorkgroupRepository;
 use Illuminate\Support\Facades\Hash;
-use Livewire\Attributes\Rule;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
@@ -32,16 +29,13 @@ class Edit extends Component
     ])]
     public array $workgroup_ids;
 
-    #[Validate(['required', 'numeric', 'exists:' . Role::class . ',id'])]
-    public int $role_id;
-
     public function update()
     {
         $this->validate();
 
         $repository = app()->make(UserRepository::class);
 
-        $fields = $this->only(['name', 'role_id']);
+        $fields = $this->only(['name']);
 
         if(!empty($this->password))
             $fields['password'] = Hash::make($this->password);
@@ -62,16 +56,11 @@ class Edit extends Component
 
         $this->workgroup_ids = $this->operator->workgroups->pluck('id')->toArray();
 
-        $this->role_id = $this->operator->role_id;
     }
 
-    public function render(
-        WorkgroupRepository $workgroupRepository,
-        RoleRepository $roleRepository,
-    )
+    public function render(WorkgroupRepository $workgroupRepository)
     {
         return view('livewire.pages.operator.edit')
-            ->with('workgroups', $workgroupRepository->all(['id', 'name']))
-            ->with('roles', $roleRepository->all(['id', 'name']));
+            ->with('workgroups', $workgroupRepository->all(['id', 'name']));
     }
 }

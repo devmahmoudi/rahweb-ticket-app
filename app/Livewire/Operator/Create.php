@@ -3,10 +3,8 @@
 namespace App\Livewire\Operator;
 
 use App\Enums\User\UserType;
-use App\Models\Role;
 use App\Models\User;
 use App\Models\Workgroup;
-use App\Repositories\RoleRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\WorkgroupRepository;
 use Illuminate\Support\Facades\Hash;
@@ -33,9 +31,6 @@ class Create extends Component
     ])]
     public array $workgroup_ids;
 
-    #[Validate(['required', 'numeric', 'exists:' . Role::class . ',id'])]
-    public int $role_id;
-
     public function store()
     {
         $this->validate();
@@ -44,7 +39,7 @@ class Create extends Component
 
         $this->password = Hash::make($this->password);
 
-        ($user = $repository->create($this->only(['email', 'name', 'role_id', 'password']))) &&
+        ($user = $repository->create($this->only(['email', 'name', 'password']))) &&
         $user->workgroups()->sync($this->workgroup_ids) ?
             session()->flash('alert-success', 'اوپراتور جدید ایجاد شد !'):
             session()->flash('alert-danger', 'وجود خطا در سرور');
@@ -59,13 +54,9 @@ class Create extends Component
         $this->authorize('create', User::class);
     }
 
-    public function render(
-        WorkgroupRepository $workgroupRepository,
-        RoleRepository $roleRepository,
-    )
+    public function render(WorkgroupRepository $workgroupRepository)
     {
         return view('livewire.pages.operator.create')
-            ->with('workgroups', $workgroupRepository->all(['id', 'name']))
-            ->with('roles', $roleRepository->all(['id', 'name']));
+            ->with('workgroups', $workgroupRepository->all(['id', 'name']));
     }
 }

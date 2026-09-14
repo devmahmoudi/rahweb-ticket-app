@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use App\Enums\Permission\BasicPermission;
 use App\Models\Media;
 use App\Models\User;
 
@@ -16,17 +15,9 @@ class MediaPolicy
         if ($user->isCustomer())
             return false;
 
-        if ($user->isAdmin())
+        if ($user->isAdmin() || $user->isSuperadmin())
             return true;
-
-        if ($user->isOperator()) {
-            return $user->role->permissions()
-                ->where("name", BasicPermission::READ->value)
-                ->where('model', Media::class)
-                ->exists();
-        }
-
-        return false;
+        return $user->isOperator();
     }
 
     /**
@@ -37,17 +28,9 @@ class MediaPolicy
         if ($user->isCustomer())
             return false;
 
-        if ($user->isAdmin())
+        if ($user->isAdmin() || $user->isSuperadmin())
             return true;
-
-        if ($user->isOperator()) {
-            return $user->role->permissions()
-                ->where("name", BasicPermission::READ->value)
-                ->where('model', Media::class)
-                ->exists();
-        }
-
-        return false;
+        return $user->isOperator();
     }
 
     /**
@@ -58,17 +41,9 @@ class MediaPolicy
         if ($user->isCustomer())
             return false;
 
-        if ($user->isAdmin())
+        if ($user->isAdmin() || $user->isSuperadmin())
             return true;
-
-        if ($user->isOperator()) {
-            return $user->role->permissions()
-                ->where("name", BasicPermission::CREATE->value)
-                ->where('model', Media::class)
-                ->exists();
-        }
-
-        return false;
+        return $user->isOperator();
     }
 
     /**
@@ -79,17 +54,9 @@ class MediaPolicy
         if ($user->isCustomer())
             return false;
 
-        if ($user->isAdmin())
+        if ($user->isAdmin() || $user->isSuperadmin())
             return true;
-
-        if ($user->isOperator()) {
-            return $user->role->permissions()
-                ->where("name", BasicPermission::UPDATE->value)
-                ->where('model', Media::class)
-                ->exists();
-        }
-
-        return false;
+        return $user->isOperator();
     }
 
     /**
@@ -100,16 +67,8 @@ class MediaPolicy
         if ($user->isCustomer())
             return false;
 
-        if ($user->isAdmin())
+        if ($user->isAdmin() || $user->isSuperadmin())
             return true;
-
-        if ($user->isOperator()) {
-            return $user->role->permissions()
-                ->where("name", BasicPermission::DELETE->value)
-                ->where('model', Media::class)
-                ->exists();
-        }
-
-        return false;
+        return $user->isOperator();
     }
 }

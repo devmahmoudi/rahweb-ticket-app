@@ -2,10 +2,8 @@
 
 namespace App\Policies;
 
-use App\Enums\Permission\BasicPermission;
 use App\Models\User;
 use App\Models\Workgroup;
-use Illuminate\Auth\Access\Response;
 
 class WorkgroupPolicy
 {
@@ -14,21 +12,7 @@ class WorkgroupPolicy
      */
     public function viewAny(User $user): bool
     {
-        if($user->isCustomer())
-            return false;
-
-        if($user->isAdmin())
-            return true;
-
-        if($user->isOperator()){
-            if($role = $user->role)
-            return $role->permissions()
-                ->where("name", BasicPermission::READ->value)
-                ->where('model', Workgroup::class)
-                ->exists();
-        }
-
-        return false;
+        return $user->isAdmin() || $user->isSuperadmin();
     }
 
     /**
@@ -36,20 +20,7 @@ class WorkgroupPolicy
      */
     public function view(User $user, Workgroup $workgroup): bool
     {
-        if($user->isCustomer())
-            return false;
-
-        if($user->isAdmin())
-            return true;
-
-        if($user->isOperator()){
-            return $user->role->permissions()
-                ->where("name", BasicPermission::READ->value)
-                ->where('model', Workgroup::class)
-                ->exists();
-        }
-
-        return false;
+        return $user->isAdmin() || $user->isSuperadmin();
     }
 
     /**
@@ -57,20 +28,7 @@ class WorkgroupPolicy
      */
     public function create(User $user): bool
     {
-        if($user->isCustomer())
-            return false;
-
-        if($user->isAdmin())
-            return true;
-
-        if($user->isOperator()){
-            return $user->role->permissions()
-                ->where("name", BasicPermission::CREATE->value)
-                ->where('model', Workgroup::class)
-                ->exists();
-        }
-
-        return false;
+        return $user->isAdmin() || $user->isSuperadmin();
     }
 
     /**
@@ -78,20 +36,7 @@ class WorkgroupPolicy
      */
     public function update(User $user, Workgroup $workgroup): bool
     {
-        if($user->isCustomer())
-            return false;
-
-        if($user->isAdmin())
-            return true;
-
-        if($user->isOperator()){
-            return $user->role->permissions()
-                ->where("name", BasicPermission::UPDATE->value)
-                ->where('model', Workgroup::class)
-                ->exists();
-        }
-
-        return false;
+        return $user->isAdmin() || $user->isSuperadmin();
     }
 
     /**
@@ -99,20 +44,7 @@ class WorkgroupPolicy
      */
     public function delete(User $user, Workgroup $workgroup): bool
     {
-        if($user->isCustomer())
-            return false;
-
-        if($user->isAdmin())
-            return true;
-
-        if($user->isOperator()){
-            return $user->role->permissions()
-                ->where("name", BasicPermission::DELETE->value)
-                ->where('model', Workgroup::class)
-                ->exists();
-        }
-
-        return false;
+        return $user->isAdmin() || $user->isSuperadmin();
     }
 
     /**
@@ -120,20 +52,7 @@ class WorkgroupPolicy
      */
     public function restore(User $user, Workgroup $workgroup): bool
     {
-        if($user->isCustomer())
-            return false;
-
-        if($user->isAdmin())
-            return true;
-
-        if($user->isOperator()){
-            return $user->role->permissions()
-                ->where("name", BasicPermission::UPDATE->value)
-                ->where('model', Workgroup::class)
-                ->exists();
-        }
-
-        return false;
+        return $user->isAdmin() || $user->isSuperadmin();
     }
 
     /**
@@ -141,19 +60,6 @@ class WorkgroupPolicy
      */
     public function forceDelete(User $user, Workgroup $workgroup): bool
     {
-        if($user->isCustomer())
-            return false;
-
-        if($user->isAdmin())
-            return true;
-
-        if($user->isOperator()){
-            return $user->role->permissions()
-                ->where("name", BasicPermission::DELETE->value)
-                ->where('model', Workgroup::class)
-                ->exists();
-        }
-
-        return false;
+        return $user->isAdmin() || $user->isSuperadmin();
     }
 }

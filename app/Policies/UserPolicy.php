@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Enums\Permission\BasicPermission;
 use App\Enums\User\UserType;
+use App\Models\Ticket;
 use App\Models\User;
 
 class UserPolicy
@@ -16,18 +16,10 @@ class UserPolicy
         if($user->isCustomer())
             return false;
 
-        if($user->isAdmin())
+        if($user->isAdmin() || $user->isSuperadmin())
             return true;
 
-        if($user->isOperator()){
-            if($role = $user->role)
-            return $role->permissions()
-                ->where("name", BasicPermission::READ->value)
-                ->where('model', User::class)
-                ->exists();
-        }
-
-        return false;
+        return $user->isOperator();
     }
 
     /**
@@ -36,19 +28,16 @@ class UserPolicy
     public function view(User $user, User $target): bool
     {
         if($user->isCustomer())
-            return $target->id == auth()->id();
+            return $target->id == $user->id;
 
-        if($user->isAdmin())
+        if($user->isAdmin() || $user->isSuperadmin())
             return true;
 
-        if($user->isOperator()){
-            return $user->role->permissions()
-                ->where("name", BasicPermission::READ->value)
-                ->where('model', User::class)
+        return $user->isOperator()
+            && $target->type == UserType::CUSTOMER->value
+            && Ticket::withoutGlobalScopes()->where('user_id', $target->id)
+                ->where('recipient_id', $user->id)
                 ->exists();
-        }
-
-        return false;
     }
 
     /**
@@ -59,17 +48,7 @@ class UserPolicy
         if($user->isCustomer())
             return false;
 
-        if($user->isAdmin())
-            return true;
-
-        if($user->isOperator()){
-            return $user->role->permissions()
-                ->where("name", BasicPermission::CREATE->value)
-                ->where('model', User::class)
-                ->exists();
-        }
-
-        return false;
+        return $user->isAdmin() || $user->isSuperadmin();
     }
 
     /**
@@ -80,15 +59,8 @@ class UserPolicy
         if($user->isCustomer())
             return false;
 
-        if($user->isAdmin())
+        if($user->isAdmin() || $user->isSuperadmin())
             return true;
-
-        if($user->isOperator()){
-            return $user->role->permissions()
-                ->where("name", BasicPermission::UPDATE->value)
-                ->where('model', User::class)
-                ->exists();
-        }
 
         return false;
     }
@@ -101,19 +73,8 @@ class UserPolicy
         if($user->isCustomer())
             return false;
 
-        if($user->isAdmin())
+        if($user->isAdmin() || $user->isSuperadmin())
             return true;
-
-        if($user->isOperator()){
-            return
-                $user->role->permissions()
-                ->where("name", BasicPermission::DELETE->value)
-                ->where('model', User::class)
-                ->exists()
-                and
-                $target->type != UserType::ADMIN->value;
-        }
-
         return false;
     }
 
@@ -125,16 +86,8 @@ class UserPolicy
         if($user->isCustomer())
             return false;
 
-        if($user->isAdmin())
+        if($user->isAdmin() || $user->isSuperadmin())
             return true;
-
-        if($user->isOperator()){
-            return $user->role->permissions()
-                ->where("name", BasicPermission::UPDATE->value)
-                ->where('model', User::class)
-                ->exists();
-        }
-
         return false;
     }
 
@@ -146,19 +99,8 @@ class UserPolicy
         if($user->isCustomer())
             return false;
 
-        if($user->isAdmin())
+        if($user->isAdmin() || $user->isSuperadmin())
             return true;
-
-        if($user->isOperator()){
-            return
-                $user->role->permissions()
-                    ->where("name", BasicPermission::DELETE->value)
-                    ->where('model', User::class)
-                    ->exists()
-                and
-                $target->type != UserType::ADMIN->value;
-        }
-
         return false;
     }
 }

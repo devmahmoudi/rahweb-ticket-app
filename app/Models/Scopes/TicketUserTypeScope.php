@@ -27,7 +27,7 @@ class TicketUserTypeScope implements Scope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        if(auth()->user()->type == UserType::ADMIN->value)
+        if(in_array(auth()->user()->type, [UserType::ADMIN->value, UserType::SUPERADMIN->value]))
             return;
 
         elseif(auth()->user()->type == UserType::CUSTOMER->value)
