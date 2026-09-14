@@ -22,7 +22,7 @@
                         <td class="underline">
                             <a href="#" wire:click="open({{ $ticket }})">
                                 {{ \Illuminate\Support\Str::words($ticket->title, 3) }}
-                                @if($ticket->status == \App\Enums\Ticket\TicketStatus::WAITING->value)
+                                @if($ticket->status == \App\TicketStateManagement\TicketState::WAITING->value)
                                     <small class="badge text-white bg-danger p-1">جدید</small>
                                 @endif
                             </a>
@@ -34,7 +34,7 @@
                             <small>{{ \Morilog\Jalali\Jalalian::forge($ticket->created_at)->format('H:i Y/m/d') }}</small>
                         </td>
                         <td>
-                            @if($ticket->status == \App\Enums\Ticket\TicketStatus::WAITING->value)
+                            @if($ticket->status == \App\TicketStateManagement\TicketState::WAITING->value)
                                 <a wire:click="open({{ $ticket }})" class="btn btn-outline-primary btn-sm" href="#"><i
                                         class="bx bx-message-dots me-1"></i>پذیرش
                                     تیکت</a>
@@ -59,6 +59,6 @@
             </table>
         </div>
 
-        <livewire:ticket.assignment />
+        <livewire:ticket.assignment/>
     </div>
 </div>

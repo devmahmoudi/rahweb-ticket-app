@@ -132,15 +132,15 @@
                 const ticketImpressionConfig = impressionChartConfig
 
                 impressionChartConfig.series = [
-                    {{ \App\Facades\TicketRepositoryFacade::count(ticketStatus: \App\Enums\Ticket\TicketStatus::PENDING->value) }},
-                    {{ \App\Facades\TicketRepositoryFacade::count(ticketStatus: \App\Enums\Ticket\TicketStatus::WAITING->value) }},
-                    {{ \App\Facades\TicketRepositoryFacade::count(ticketStatus: \App\Enums\Ticket\TicketStatus::CLOSED->value) }},
+                    {{ \App\Facades\TicketRepositoryFacade::count(TicketState: \App\TicketStateManagement\TicketState::PENDING->value) }},
+                    {{ \App\Facades\TicketRepositoryFacade::count(TicketState: \App\TicketStateManagement\TicketState::WAITING->value) }},
+                    {{ \App\Facades\TicketRepositoryFacade::count(TicketState: \App\TicketStateManagement\TicketState::CLOSED->value) }},
                 ]
 
                 impressionChartConfig.labels = [
-                    '{{ \App\Enums\Ticket\TicketStatus::PENDING->value }}',
-                    '{{ \App\Enums\Ticket\TicketStatus::WAITING->value }}',
-                    '{{ \App\Enums\Ticket\TicketStatus::CLOSED->value}}'
+                    '{{ \App\TicketStateManagement\TicketState::PENDING->value }}',
+                    '{{ \App\TicketStateManagement\TicketState::WAITING->value }}',
+                    '{{ \App\TicketStateManagement\TicketState::CLOSED->value}}'
                 ]
 
                 if (typeof ticketImpressionEle !== undefined && ticketImpressionEle !== null) {
@@ -155,13 +155,13 @@
     </x-slot:script>
     <div class="card">
         <div class="card-body d-flex justify-content-around text-center" style="position: relative;">
-        @can('viewAny', \App\Models\Ticket::class)
-            <!-- Ticket -->
+            @can('viewAny', \App\Models\Ticket::class)
+                <!-- Ticket -->
                 <div>
                     <h4>تیکت ها</h4>
                     <div id="ticket-impression" class="mt-2"></div>
                 </div>
-        @endcan
+            @endcan
 
         </div>
     </div>

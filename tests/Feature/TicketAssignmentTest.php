@@ -2,18 +2,18 @@
 
 namespace Tests\Feature;
 
-use App\Enums\Ticket\TicketStatus;
 use App\Events\NewTicket;
 use App\Events\TicketAssigmentChanged;
 use App\Livewire\Cartable\Tickets as CartableTickets;
 use App\Livewire\Ticket\Assignment;
 use App\Livewire\Ticket\Index;
+use App\Models\Chat;
 use App\Models\Ticket;
 use App\Models\User;
-use App\Models\Chat;
 use App\Repositories\TicketRepository;
-use Illuminate\Support\Facades\Event;
+use App\TicketStateManagement\TicketState;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -73,7 +73,7 @@ class TicketAssignmentTest extends TestCase
         $this->assertTrue($superadmin->can('assign', $ticket));
         $this->assertFalse($otherOperator->can('assign', $ticket));
 
-        $ticket->update(['status' => TicketStatus::CLOSED->value]);
+        $ticket->update(['status' => TicketState::CLOSED->value]);
 
         $this->assertFalse($recipient->can('assign', $ticket));
         $this->assertFalse($superadmin->can('assign', $ticket));
@@ -168,7 +168,7 @@ class TicketAssignmentTest extends TestCase
         $this->assertSame("private-workgroup.{$ticket->workgroup_id}", $workgroupChannel->name);
 
         $target = User::factory()->operator()->create();
-        $ticket->update(['recipient_id' => $target->id, 'status' => TicketStatus::PENDING->value]);
+        $ticket->update(['recipient_id' => $target->id, 'status' => TicketState::PENDING->value]);
         $userChannel = (new NewTicket($ticket))->broadcastOn()[0];
 
         $this->assertSame("private-user.{$target->id}", $userChannel->name);
@@ -182,7 +182,7 @@ class TicketAssignmentTest extends TestCase
         $this->actingAs($superadmin);
 
         Livewire::test(Index::class)
-            ->set('status', TicketStatus::PENDING->value)
+            ->set('status', TicketState::PENDING->value)
             ->assertSee('واگذاری');
 
         Livewire::test(CartableTickets::class)
@@ -194,7 +194,7 @@ class TicketAssignmentTest extends TestCase
         $this->actingAs($customer);
 
         Livewire::test(Index::class)
-            ->set('status', TicketStatus::PENDING->value)
+            ->set('status', TicketState::PENDING->value)
             ->assertDontSee('واگذاری');
 
         Livewire::test(CartableTickets::class)

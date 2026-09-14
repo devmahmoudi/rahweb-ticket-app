@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Cartable;
 
-use App\Enums\Ticket\TicketStatus;
 use App\Models\Ticket;
 use App\Repositories\Message\MessageRepository;
 use App\Repositories\TicketRepository;
+use App\TicketStateManagement\TicketState;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -85,7 +85,7 @@ class Tickets extends Component
         $lock = cache()->lock(config('ticket.accept-cache-lock-prefix') . $ticket->id, 2)->block(2, function() use ($ticket){
             $ticket->fresh();
 
-            if($ticket->status == TicketStatus::WAITING->value){
+            if($ticket->status == TicketState::WAITING->value){
                 $repository = app()->make(TicketRepository::class);
 
                 $repository->accept($ticket);

@@ -2,24 +2,24 @@
 
 namespace App\Repositories;
 
-use App\Enums\Ticket\TicketStatus;
 use App\Events\TicketAccepted;
 use App\Models\Chat;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Repositories\Chat\ChatRepository;
 use App\Repositories\Message\MessageRepository;
+use App\TicketStateManagement\TicketState;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class TicketRepository
 {
-    public function count(array $where = [], ?string $ticketStatus = null): int
+    public function count(array $where = [], ?string $TicketState = null): int
     {
         return
             Ticket::where($where)
-            ->when($ticketStatus, function ($query) use ($ticketStatus){
-                $query->where('status', $ticketStatus);
+            ->when($TicketState, function ($query) use ($TicketState){
+                $query->where('status', $TicketState);
             })->count();
     }
 
@@ -32,7 +32,7 @@ class TicketRepository
      */
     public function waitingTickets(bool $pagination = true, ?int $perpage = 10):mixed
     {
-        $query = Ticket::where('status', TicketStatus::WAITING->value);
+        $query = Ticket::where('status', TicketState::WAITING->value);
 
         return $pagination ?
             $query->paginate($perpage) :
@@ -48,7 +48,7 @@ class TicketRepository
      */
     public function pendingTickets(bool $pagination = true, ?int $perpage = 10):mixed
     {
-        $query = Ticket::where('status', TicketStatus::PENDING->value);
+        $query = Ticket::where('status', TicketState::PENDING->value);
 
         return $pagination ?
             $query->paginate($perpage) :
@@ -64,7 +64,7 @@ class TicketRepository
      */
     public function closedTickets(bool $pagination = true, ?int $perpage = 10):mixed
     {
-        $query = Ticket::where('status', TicketStatus::CLOSED->value);
+        $query = Ticket::where('status', TicketState::CLOSED->value);
 
         return $pagination ?
             $query->paginate($perpage) :
@@ -80,7 +80,7 @@ class TicketRepository
      */
     public function notClosedTickets(bool $pagination = true, ?int $perpage = 10):mixed
     {
-        $query = Ticket::where('status', '!=', TicketStatus::CLOSED->value);
+        $query = Ticket::where('status', '!=', TicketState::CLOSED->value);
 
         return $pagination ?
             $query->paginate($perpage) :
@@ -134,7 +134,7 @@ class TicketRepository
 
         if(!$this->update($ticket,
             [
-                'status' => TicketStatus::PENDING->value,
+                'status' => TicketState::PENDING->value,
                 'recipient_id' => $acceptable ?? auth()->id()
             ]
         ))
@@ -171,7 +171,7 @@ class TicketRepository
             return false;
 
         $this->update($ticket, [
-            'status' => TicketStatus::CLOSED->value,
+            'status' => TicketState::CLOSED->value,
         ]);
 
         DB::commit();

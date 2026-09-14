@@ -2,11 +2,10 @@
 
 namespace App\Livewire\Ticket;
 
-use App\Enums\Ticket\TicketStatus;
 use App\Enums\User\UserType;
 use App\Models\Ticket;
 use App\Repositories\TicketRepository;
-use Illuminate\Database\Eloquent\Collection;
+use App\TicketStateManagement\TicketState;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -45,7 +44,7 @@ class Index extends Component
         $lock = cache()->lock(config('ticket.accept-cache-lock-prefix') . $ticket->id, 2)->block(2, function() use ($ticket){
             $ticket->fresh();
 
-            if($ticket->status == TicketStatus::WAITING->value){
+            if($ticket->status == TicketState::WAITING->value){
                 $repository = app()->make(TicketRepository::class);
 
                 $repository->accept($ticket);
@@ -66,7 +65,7 @@ class Index extends Component
 
         $this->ticketRepository->update($ticket,
             [
-                'status' => TicketStatus::CLOSED->value,
+                'status' => TicketState::CLOSED->value,
                 'recipient_id' => null,
             ]) ?
             session()->now('alert-success', 'تیکت بسته شد !') :
@@ -87,7 +86,7 @@ class Index extends Component
     public function render()
     {
         if(auth()->user()->type == UserType::CUSTOMER->value)
-            $tickets = $this->status == TicketStatus::CLOSED->value ?
+            $tickets = $this->status == TicketState::CLOSED->value ?
                 $this->ticketRepository->closedTickets() :
                 $this->ticketRepository->notClosedTickets();
         else

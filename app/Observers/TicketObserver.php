@@ -2,12 +2,12 @@
 
 namespace App\Observers;
 
-use App\Enums\Ticket\TicketStatus;
 use App\Events\NewTicket;
 use App\Events\TicketAssigmentChanged;
 use App\Models\Chat;
 use App\Models\Ticket;
 use App\Repositories\Message\MessageRepository;
+use App\TicketStateManagement\TicketState;
 
 class TicketObserver
 {
@@ -26,7 +26,7 @@ class TicketObserver
     {
         if (
             $ticket->wasChanged('recipient_id') &&
-            $ticket->status === TicketStatus::PENDING->value &&
+            $ticket->status === TicketState::PENDING->value &&
             $ticket->getOriginal('recipient_id') !== null &&
             $ticket->recipient_id !== null
         ) {

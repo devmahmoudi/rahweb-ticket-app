@@ -2,14 +2,12 @@
 
 namespace App\Listeners;
 
-use App\Enums\Ticket\TicketStatus;
 use App\Events\MessageCreated;
 use App\Events\NewTicket;
 use App\Repositories\Chat\ChatRepository;
 use App\Repositories\TicketRepository;
 use App\Repositories\UserRepository;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
+use App\TicketStateManagement\TicketState;
 
 class OpenTicketAgain
 {
@@ -30,11 +28,11 @@ class OpenTicketAgain
         if(!$ticket = $this->chatRepository->findRelevantTicket($event->message->chat_id))
             return;
 
-        if($ticket->status != TicketStatus::CLOSED->value)
+        if($ticket->status != TicketState::CLOSED->value)
             return;
 
         if(!$this->ticketRepository->update($ticket, [
-            'status' => TicketStatus::PENDING,
+            'status' => TicketState::PENDING,
         ]))
             return;
 

@@ -16,24 +16,24 @@
                 <ul class="nav nav-pills" role="tablist">
                     @if(auth()->user()->type != \App\Enums\User\UserType::CUSTOMER->value)
                         <li class="nav-item">
-                            <a href="{{ route('ticket.index', ['status' => \App\Enums\Ticket\TicketStatus::WAITING->value]) }}"
+                            <a href="{{ route('ticket.index', ['status' => \App\TicketStateManagement\TicketState::WAITING->value]) }}"
 
-                                @class(['nav-link', 'active' => (request()->query('status') == \App\Enums\Ticket\TicketStatus::WAITING->value)])>در
+                                @class(['nav-link', 'active' => (request()->query('status') == \App\TicketStateManagement\TicketState::WAITING->value)])>در
                                 انتظار پاسخگو
                             </a>
                         </li>
                     @endcan
                     <li class="nav-item">
-                        <a href="{{ route('ticket.index', ['status' => \App\Enums\Ticket\TicketStatus::PENDING->value]) }}"
+                        <a href="{{ route('ticket.index', ['status' => \App\TicketStateManagement\TicketState::PENDING->value]) }}"
 
-                            @class(['nav-link', 'active' => (request()->query('status') == \App\Enums\Ticket\TicketStatus::PENDING->value)])>تیکت
+                            @class(['nav-link', 'active' => (request()->query('status') == \App\TicketStateManagement\TicketState::PENDING->value)])>تیکت
                             های باز
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('ticket.index', ['status' => \App\Enums\Ticket\TicketStatus::CLOSED->value]) }}"
+                        <a href="{{ route('ticket.index', ['status' => \App\TicketStateManagement\TicketState::CLOSED->value]) }}"
 
-                            @class(['nav-link', 'active' => (request()->query('status') == \App\Enums\Ticket\TicketStatus::CLOSED->value)])>بسته
+                            @class(['nav-link', 'active' => (request()->query('status') == \App\TicketStateManagement\TicketState::CLOSED->value)])>بسته
                             شده
                         </a>
                     </li>
@@ -84,6 +84,6 @@
     </div>
     {{ $tickets->links('vendor.livewire.bootstrap') }}
 
-    <livewire:ticket.assignment />
+    <livewire:ticket.assignment/>
 </div>
 
