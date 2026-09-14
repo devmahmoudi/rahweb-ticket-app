@@ -91,10 +91,50 @@
                 </form>
             </div>
             <div class="tab-content">
+                @if(auth()->user()->isOperator() || auth()->user()->isSuperadmin())
+                    <div class="d-flex flex-wrap gap-2 align-items-center p-3 border-bottom">
+                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                                wire:click="toggleBulkMode">
+                            {{ $bulkMode ? 'لغو حالت گروهی' : 'تغییر وضعیت گروهی' }}
+                        </button>
+                        @if($bulkMode && count($selectedTicketIds) > 0)
+                            @if(in_array('claim', $bulkActions, true))
+                                <button type="button" class="btn btn-outline-primary btn-sm"
+                                        wire:click="applyBulkTransition('claim')"
+                                        wire:confirm="از پذیرش تیکت‌های انتخاب‌شده مطمئن هستید؟">
+                                    پذیرش انتخاب‌شده‌ها
+                                </button>
+                            @endif
+                            @if(in_array('delegate', $bulkActions, true))
+                                <button type="button" class="btn btn-outline-warning btn-sm"
+                                        wire:click="openBulkDelegateModal">
+                                    ارجاع انتخاب‌شده‌ها
+                                </button>
+                            @endif
+                            @if(in_array('publish', $bulkActions, true))
+                                <button type="button" class="btn btn-outline-info btn-sm"
+                                        wire:click="applyBulkTransition('publish')"
+                                        wire:confirm="از ارسال تیکت‌های انتخاب‌شده به وب سرویس مطمئن هستید؟">
+                                    ارسال انتخاب‌شده‌ها به وب سرویس
+                                </button>
+                            @endif
+                            @if(in_array('reject', $bulkActions, true))
+                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                        wire:click="applyBulkTransition('reject')"
+                                        wire:confirm="از رد تیکت‌های انتخاب‌شده مطمئن هستید؟">
+                                    رد انتخاب‌شده‌ها
+                                </button>
+                            @endif
+                        @endif
+                    </div>
+                @endif
                 <div class="table-responsive text-nowrap overflow-visible">
                     <table class="table table-striped">
                         <thead>
                             <tr>
+                                @if($bulkMode)
+                                    <th></th>
+                                @endif
                                 <th>#</th>
                                 <th>عنوان</th>
                                 <th>وضعیت</th>
@@ -105,6 +145,15 @@
                         <tbody class="table-border-bottom-0">
                             @foreach($tickets as $ticket)
                             <tr wire:key="{{ $ticket->id }}">
+                                @if($bulkMode)
+                                    <td>
+                                        @can('update', $ticket)
+                                            <input type="checkbox" value="{{ $ticket->id }}"
+                                                   wire:model.live="selectedTicketIds"
+                                                   aria-label="انتخاب {{ $ticket->title }}">
+                                        @endcan
+                                    </td>
+                                @endif
                                 <td>{{ $loop->iteration }}</td>
                                 <td class="underline">
                                     <a href="#" wire:click="openChat({{ $ticket }})">{{ $ticket->title }}</a>
@@ -168,6 +217,34 @@
                 </div>
             </div>
         </div>
+
+        @if($showBulkDelegateModal)
+            <div class="modal d-block" tabindex="-1" role="dialog" style="background: rgba(0, 0, 0, .5)">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">ارجاع گروهی تیکت‌ها</h5>
+                            <button type="button" class="btn-close" wire:click="closeBulkDelegateModal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <select wire:model="bulkDelegateTargetId" class="form-select">
+                                <option value="">انتخاب مدیر</option>
+                                @foreach(\App\Models\User::query()->where('type', \App\Enums\User\UserType::SUPERADMIN->value)->where('id', '!=', auth()->id())->get() as $admin)
+                                    <option value="{{ $admin->id }}">{{ $admin->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" wire:click="closeBulkDelegateModal">انصراف</button>
+                            <button type="button" class="btn btn-primary" wire:click="applyBulkDelegate"
+                                    wire:confirm="از ارجاع تیکت‌های انتخاب‌شده مطمئن هستید؟">
+                                تایید ارجاع
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
 
     </div>
     {{ $tickets->links('vendor.livewire.bootstrap') }}

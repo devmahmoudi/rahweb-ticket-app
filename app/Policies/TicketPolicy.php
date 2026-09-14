@@ -58,7 +58,16 @@ class TicketPolicy
         if($user->isSuperadmin())
             return true;
 
-        return $user->isOperator() && $ticket->recipient_id == $user->id;
+        if (!$user->isOperator()) {
+            return false;
+        }
+
+        if ($ticket->recipient_id === $user->id) {
+            return true;
+        }
+
+        return $ticket->status === TicketState::PENDING->value
+            && $user->workgroups()->whereKey($ticket->workgroup_id)->exists();
     }
 
     /**

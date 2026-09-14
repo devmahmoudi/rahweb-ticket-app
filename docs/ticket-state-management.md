@@ -25,3 +25,4 @@ For ticket state management, we use the **State Design Pattern**.
 - On each state transition, an alert [Message](../app/Models/Message.php) should send to correspond ticket chat
 - Ticket state transition options, should display as button in tickets table - based ticket current [State](../app/TicketStateManagement/TicketState.php) and ask confirmation before submit
 - Ticket current [State](../app/TicketStateManagement/TicketStateInterface.php) should automatically load in accessor and should available with straightforward syntax $ticket->stateManagement():[TicketStateInterface](../app/TicketStateManagement/TicketStateInterface.php)
+- Operators should, can change status bulk of tickets

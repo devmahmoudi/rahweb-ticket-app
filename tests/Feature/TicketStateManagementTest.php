@@ -28,7 +28,7 @@ class TicketStateManagementTest extends TestCase
         $this->assertSame(TicketState::ACCEPTED->value, $ticket->fresh()->status);
         $this->assertSame($actor->id, $ticket->fresh()->recipient_id);
         Event::assertDispatched(TicketStateChanged::class);
-        $this->assertDatabaseHas('messages', ['chat_id' => $chat->id, 'body' => 'Ticket claimed.']);
+        $this->assertDatabaseHas('messages', ['chat_id' => $chat->id, 'body' => "تیکت شما توسط {$actor->name} در حال رسیدگی است"]);
     }
 
     public function test_accepted_ticket_can_be_delegated_or_rejected(): void
@@ -44,7 +44,7 @@ class TicketStateManagementTest extends TestCase
         $this->assertSame(TicketState::DELEGATED->value, $ticket->fresh()->status);
         $this->assertSame($target->id, $ticket->fresh()->recipient_id);
         Event::assertDispatched(TicketStateChanged::class);
-        $this->assertDatabaseHas('messages', ['chat_id' => $chat->id, 'body' => "Ticket delegated to {$target->name}."]);
+        $this->assertDatabaseHas('messages', ['chat_id' => $chat->id, 'body' => "تیکت شما تایید و به  {$target->name} منتقل شده است."]);
     }
 
     public function test_delegated_ticket_can_be_published(): void
@@ -58,7 +58,7 @@ class TicketStateManagementTest extends TestCase
 
         $this->assertSame(TicketState::WEBSERVICE->value, $ticket->fresh()->status);
         Event::assertDispatched(TicketStateChanged::class);
-        $this->assertDatabaseHas('messages', ['chat_id' => $chat->id, 'body' => 'Ticket published to web service.']);
+        $this->assertDatabaseHas('messages', ['chat_id' => $chat->id, 'body' => 'تیکت شما تایید و جهت تکمیل فرایند به وب سرویس ارسال شد']);
     }
 
     public function test_rejecting_an_accepted_ticket_blocks_chat_members_and_creates_alert(): void
@@ -79,7 +79,7 @@ class TicketStateManagementTest extends TestCase
         ]);
         $this->assertDatabaseHas('messages', [
             'chat_id' => $chat->id,
-            'body' => 'Ticket rejected.',
+            'body' => 'تیکت شما رد شد',
         ]);
         Event::assertDispatched(TicketStateChanged::class);
     }
@@ -118,6 +118,21 @@ class TicketStateManagementTest extends TestCase
             ->assertDontSee('ارسال به وب سرویس');
     }
 
+    public function test_bulk_mode_displays_selection_checkbox_for_pending_workgroup_tickets(): void
+    {
+        $operator = User::factory()->operator()->create();
+        $ticket = Ticket::factory()->pending()->create();
+        $operator->workgroups()->attach($ticket->workgroup_id);
+
+        $this->actingAs($operator);
+
+        Livewire::test(Index::class)
+            ->set('status', TicketState::PENDING->value)
+            ->set('bulkMode', true)
+            ->assertSee('type="checkbox"', false)
+            ->assertSee('لغو حالت گروهی');
+    }
+
     public function test_ticket_index_can_delegate_an_accepted_ticket_to_a_superadmin(): void
     {
         $operator = User::factory()->operator()->create();
@@ -153,5 +168,60 @@ class TicketStateManagementTest extends TestCase
 
         $component->newTicket();
         $this->assertTrue(true);
+    }
+
+    public function test_bulk_actions_for_accepted_tickets_are_delegate_and_reject(): void
+    {
+        $operator = User::factory()->operator()->create();
+        $tickets = Ticket::factory()->count(2)->create([
+            'status' => TicketState::ACCEPTED->value,
+            'recipient_id' => $operator->id,
+        ]);
+
+        $this->actingAs($operator);
+
+        Livewire::test(Index::class)
+            ->set('status', TicketState::ACCEPTED->value)
+            ->set('bulkMode', true)
+            ->set('selectedTicketIds', $tickets->pluck('id')->all())
+            ->assertSee('ارجاع انتخاب‌شده‌ها')
+            ->assertSee('رد انتخاب‌شده‌ها')
+            ->assertDontSee('پذیرش انتخاب‌شده‌ها')
+            ->assertDontSee('ارسال انتخاب‌شده‌ها به وب سرویس')
+            ->call('applyBulkTransition', 'reject');
+
+        $this->assertSame(
+            2,
+            Ticket::query()->whereIn('id', $tickets->pluck('id'))->where('status', TicketState::REJECTED->value)->count()
+        );
+    }
+
+    public function test_bulk_delegation_uses_one_superadmin_for_all_selected_tickets(): void
+    {
+        $operator = User::factory()->operator()->create();
+        $superadmin = User::factory()->superadmin()->create();
+        $tickets = Ticket::factory()->count(2)->create([
+            'status' => TicketState::ACCEPTED->value,
+            'recipient_id' => $operator->id,
+        ]);
+
+        $this->actingAs($operator);
+
+        Livewire::test(Index::class)
+            ->set('status', TicketState::ACCEPTED->value)
+            ->set('bulkMode', true)
+            ->set('selectedTicketIds', $tickets->pluck('id')->all())
+            ->call('openBulkDelegateModal')
+            ->assertSet('showBulkDelegateModal', true)
+            ->set('bulkDelegateTargetId', $superadmin->id)
+            ->call('applyBulkDelegate');
+
+        $this->assertSame(
+            2,
+            Ticket::withoutGlobalScopes()->whereIn('id', $tickets->pluck('id'))
+                ->where('status', TicketState::DELEGATED->value)
+                ->where('recipient_id', $superadmin->id)
+                ->count()
+        );
     }
 }

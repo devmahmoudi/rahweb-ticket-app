@@ -21,6 +21,14 @@ class Index extends Component
 
     public ?int $delegateTargetId = null;
 
+    public bool $bulkMode = false;
+
+    public array $selectedTicketIds = [];
+
+    public ?int $bulkDelegateTargetId = null;
+
+    public bool $showBulkDelegateModal = false;
+
     public function __construct()
     {
         $this->ticketRepository = app()->make(TicketRepository::class);
@@ -85,6 +93,98 @@ class Index extends Component
         $this->transition($ticket, 'delegate', $this->delegateTargetId);
     }
 
+    public function toggleBulkMode(): void
+    {
+        $this->bulkMode = !$this->bulkMode;
+        $this->selectedTicketIds = [];
+        $this->showBulkDelegateModal = false;
+    }
+
+    public function openBulkDelegateModal(): void
+    {
+        $this->authorizeBulkTransition('delegate');
+        $this->showBulkDelegateModal = true;
+    }
+
+    public function closeBulkDelegateModal(): void
+    {
+        $this->showBulkDelegateModal = false;
+        $this->bulkDelegateTargetId = null;
+    }
+
+    public function applyBulkTransition(string $action, ?int $targetId = null): void
+    {
+        $this->authorizeBulkTransition($action);
+
+        $tickets = Ticket::query()->whereIn('id', $this->selectedTicketIds)->get();
+        if ($tickets->count() !== count($this->selectedTicketIds)) {
+            abort(403);
+        }
+
+        $actor = auth()->user();
+        $target = null;
+        if ($action === 'delegate') {
+            $target = User::query()
+                ->whereKey($targetId)
+                ->where('type', UserType::SUPERADMIN->value)
+                ->firstOrFail();
+        }
+
+        foreach ($tickets as $ticket) {
+            $this->authorize('update', $ticket);
+
+            match ($action) {
+                'claim' => $ticket->stateManagement()->claim($actor),
+                'delegate' => $ticket->stateManagement()->delegateTo($actor, $target),
+                'publish' => $ticket->stateManagement()->publishToWebService($actor),
+                'reject' => $ticket->stateManagement()->reject(),
+                default => abort(422, 'Unknown ticket transition.'),
+            };
+        }
+
+        $this->selectedTicketIds = [];
+        $this->bulkMode = false;
+        $this->closeBulkDelegateModal();
+    }
+
+    public function applyBulkDelegate(): void
+    {
+        $this->applyBulkTransition('delegate', $this->bulkDelegateTargetId);
+    }
+
+    private function authorizeBulkTransition(string $action): void
+    {
+        abort_unless(auth()->user()->isOperator() || auth()->user()->isSuperadmin(), 403);
+
+        $availableActions = $this->bulkActions();
+        abort_unless(in_array($action, $availableActions, true), 422);
+    }
+
+    private function bulkActions(): array
+    {
+        if (!$this->bulkMode || $this->selectedTicketIds === []) {
+            return [];
+        }
+
+        $actionMap = [
+            TicketState::PENDING->value => ['claim'],
+            TicketState::ACCEPTED->value => ['delegate', 'reject'],
+            TicketState::DELEGATED->value => ['publish', 'reject'],
+            TicketState::WEBSERVICE->value => [],
+            TicketState::REJECTED->value => [],
+        ];
+
+        $tickets = Ticket::query()->whereIn('id', $this->selectedTicketIds)->get();
+        $actions = null;
+        foreach ($tickets as $ticket) {
+            $actions = $actions === null
+                ? $actionMap[$ticket->status] ?? []
+                : array_values(array_intersect($actions, $actionMap[$ticket->status] ?? []));
+        }
+
+        return $actions ?? [];
+    }
+
     public function mount()
     {
         $this->authorize('viewAny', Ticket::class);
@@ -116,6 +216,7 @@ class Index extends Component
             ->with('ticketCounts', $ticketCounts)
             ->with('cartableCount', $canViewCartable ? $this->ticketRepository->cartableTickets(false)->count() : 0)
             ->with('selectedStatus', $selectedStatus)
+            ->with('bulkActions', $this->bulkActions())
             ->with('tickets', $tickets);
     }
 }
