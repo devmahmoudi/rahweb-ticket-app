@@ -2,41 +2,23 @@
 
 namespace App\Repositories;
 
-use App\Enums\Ticket\TicketStatus;
-use App\Events\TicketAccepted;
 use App\Models\Chat;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Repositories\Chat\ChatRepository;
-use App\Repositories\Message\MessageRepository;
+use App\TicketStateManagement\TicketState;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class TicketRepository
 {
-    public function count(array $where = [], ?string $ticketStatus = null): int
+    public function count(array $where = [], ?string $TicketState = null): int
     {
         return
             Ticket::where($where)
-            ->when($ticketStatus, function ($query) use ($ticketStatus){
-                $query->where('status', $ticketStatus);
+            ->when($TicketState, function ($query) use ($TicketState){
+                $query->where('status', $TicketState);
             })->count();
-    }
-
-    /**
-     * Returns waiting status tickets
-     *
-     * @param bool $pagination
-     * @param int|null $perpage
-     * @return Collection
-     */
-    public function waitingTickets(bool $pagination = true, ?int $perpage = 10):mixed
-    {
-        $query = Ticket::where('status', TicketStatus::WAITING->value);
-
-        return $pagination ?
-            $query->paginate($perpage) :
-            $query->get();
     }
 
     /**
@@ -48,39 +30,18 @@ class TicketRepository
      */
     public function pendingTickets(bool $pagination = true, ?int $perpage = 10):mixed
     {
-        $query = Ticket::where('status', TicketStatus::PENDING->value);
+        $query = Ticket::where('status', TicketState::PENDING->value);
 
         return $pagination ?
             $query->paginate($perpage) :
             $query->get();
     }
 
-    /**
-     * Returns closed status tickets
-     *
-     * @param bool $pagination
-     * @param int|null $perpage
-     * @return Collection
-     */
-    public function closedTickets(bool $pagination = true, ?int $perpage = 10):mixed
+    public function cartableTickets(bool $pagination = true, ?int $perpage = 10):mixed
     {
-        $query = Ticket::where('status', TicketStatus::CLOSED->value);
-
-        return $pagination ?
-            $query->paginate($perpage) :
-            $query->get();
-    }
-
-    /**
-     * Returns tickets where their status are not equivalent to closed
-     *
-     * @param bool $pagination
-     * @param int|null $perpage
-     * @return Collection
-     */
-    public function notClosedTickets(bool $pagination = true, ?int $perpage = 10):mixed
-    {
-        $query = Ticket::where('status', '!=', TicketStatus::CLOSED->value);
+        $query = Ticket::where(function ($query){
+            $query->where('status', TicketState::PENDING->value)->orWhere('recipient_id', auth()->id());
+        })->whereNot('status', TicketState::REJECTED->value);
 
         return $pagination ?
             $query->paginate($perpage) :
@@ -130,75 +91,35 @@ class TicketRepository
      */
     public function accept(Ticket $ticket, ?User $acceptable = null):bool
     {
-        DB::beginTransaction();
+        return cache()->lock(config('ticket.accept-cache-lock-prefix') . $ticket->id, 2)->block(2, function () use ($ticket, $acceptable): bool {
+            $ticket->refresh();
 
-        if(!$this->update($ticket,
-            [
-                'status' => TicketStatus::PENDING->value,
-                'recipient_id' => $acceptable ?? auth()->id()
-            ]
-        ))
-            return false;
+            if ($ticket->status !== TicketState::PENDING->value) {
+                return false;
+            }
 
-        if(!$chat = $this->findRelevantChat($ticket))
-            return false;
+            DB::beginTransaction();
 
-        $chatRepository = app()->make(ChatRepository::class);
+            $recipient = $acceptable ?? auth()->user();
 
-        $chatRepository->joinMember($chat, $acceptable ?? auth()->user());
+            $ticket->stateManagement()->claim($recipient);
 
-        DB::commit();
+            if (!$chat = $this->findRelevantChat($ticket)) {
+                DB::rollBack();
+                return false;
+            }
 
-        broadcast(new TicketAccepted($ticket))->toOthers();
+            app(ChatRepository::class)->joinMember($chat, $recipient);
 
-        return true;
-    }
+            DB::commit();
 
-    public function close(Ticket $ticket):bool
-    {
-        DB::beginTransaction();
-
-        if(!$chat = $this->findRelevantChat($ticket))
-            return false;
-
-        $chatRepository = app()->make(ChatRepository::class);
-
-        $chatRepository->kickMember($chat, $ticket->recipient);
-
-        $messageRepository = app()->makeWith(MessageRepository::class, ['chat' => $chat]);
-
-        if(!$messageRepository->createTicketClosedMessage($ticket))
-            return false;
-
-        $this->update($ticket, [
-            'status' => TicketStatus::CLOSED->value,
-        ]);
-
-        DB::commit();
-
-        return true;
+            return true;
+        });
     }
 
     public function findRelevantChat(Ticket $ticket):Chat|null
     {
         return Chat::withoutGlobalScopes()->where('meta', Ticket::class . ",$ticket->id")->first();
-    }
-
-    public function assignTicket(Ticket $ticket, User $targetUser):void
-    {
-        DB::transaction(function () use ($ticket, $targetUser): void {
-            $chat = $this->findRelevantChat($ticket);
-
-            if ($chat) {
-                $chat->members()->detach($ticket->recipient_id);
-            }
-
-            $ticket->update(['recipient_id' => $targetUser->id]);
-
-            if ($chat) {
-                $chat->members()->syncWithoutDetaching([$targetUser->id]);
-            }
-        });
     }
 
     public function update(Ticket $ticket, array $data):bool

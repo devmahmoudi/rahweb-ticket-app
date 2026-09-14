@@ -2,9 +2,9 @@
 
 namespace App\Policies;
 
-use App\Enums\Ticket\TicketStatus;
 use App\Models\Ticket;
 use App\Models\User;
+use App\TicketStateManagement\TicketState;
 
 class TicketPolicy
 {
@@ -33,7 +33,7 @@ class TicketPolicy
         if($user->isSuperadmin())
             return true;
 
-        return $user->isOperator() && ($ticket->recipient_id == $user->id || $ticket->status == TicketStatus::WAITING->value);
+        return $user->isOperator() && ($ticket->recipient_id == $user->id || $ticket->status == TicketState::PENDING->value);
     }
 
     /**
@@ -52,25 +52,22 @@ class TicketPolicy
      */
     public function update(User $user, Ticket $ticket): bool
     {
-        if($user->isCustomer())
-            return $ticket->user_id == $user->id;
+        // if($user->isCustomer())
+        //     return $ticket->user_id == $user->id;
 
         if($user->isSuperadmin())
             return true;
 
-        return $user->isOperator() && $ticket->recipient_id == $user->id;
-    }
-
-    /**
-     * Determine whether the user can assign the ticket to another user.
-     */
-    public function assign(User $user, Ticket $ticket): bool
-    {
-        if ($ticket->status !== TicketStatus::PENDING->value) {
+        if (!$user->isOperator()) {
             return false;
         }
 
-        return $user->isSuperadmin() || $ticket->recipient_id === $user->id;
+        if ($ticket->recipient_id === $user->id) {
+            return true;
+        }
+
+        return $ticket->status === TicketState::PENDING->value
+            && $user->workgroups()->whereKey($ticket->workgroup_id)->exists();
     }
 
     /**

@@ -2,8 +2,8 @@
 
 namespace App\Models\Scopes;
 
-use App\Enums\Ticket\TicketStatus;
 use App\Enums\User\UserType;
+use App\TicketStateManagement\TicketState;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -37,7 +37,7 @@ class TicketUserTypeScope implements Scope
                     $query
                         ->where(function($query){
                            $query
-                               ->where('status', TicketStatus::WAITING->value)
+                               ->where('status', TicketState::PENDING->value)
                                ->whereIn('workgroup_id', auth()->user()->workgroups->pluck('id')->toArray());
                         })
                         ->orWhere('recipient_id', auth()->id());

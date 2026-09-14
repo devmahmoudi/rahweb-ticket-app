@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Workgroup;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -20,27 +21,29 @@ class DatabaseSeeder extends Seeder
         $this->seedCustomerUser();
     }
 
-    private function seedSuperadminUser(): void
+    private function seedSuperadminUser(): User
     {
-        User::factory()->superadmin()->create([
+        return User::factory()->superadmin()->create([
             'name' => 'Test Superadmin',
             'email' => 'superadmin@example.com',
             'password' => Hash::make('123456789'),
         ]);
     }
 
-    private function seedCustomerUser(): void
+    private function seedCustomerUser(): User
     {
         // create customer user for example
-        User::factory()->customer()->create([
+        return User::factory()->customer()->create([
             'name' => 'Test Customer',
             'email' => 'customer@example.com',
             'password' => Hash::make('123456789')
         ]);
     }
 
-    private function seedOperatorUser(): void
+    private function seedOperatorUser(): User
     {
+        $workgroup = $this->seedWorkgroup();
+
         // create operator user for example
         $operator = User::factory()->operator()->create([
             'name' => 'Test Operator',
@@ -48,5 +51,13 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('123456789')
         ]);
 
+        $operator->workgroups()->attach($workgroup);
+
+        return $operator;
+    }
+
+    private function seedWorkgroup():Workgroup
+    {
+        return Workgroup::factory()->create(['name' => 'پشتیبانی']);
     }
 }

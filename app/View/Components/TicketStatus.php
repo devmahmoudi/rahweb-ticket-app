@@ -23,14 +23,20 @@ class TicketStatus extends Component
         return <<<'blade'
 <div>
      @switch($status)
-         @case(\App\Enums\Ticket\TicketStatus::WAITING->value)
-             <span class="badge bg-warning">در انتظار پاسخگو</span>
+         @case(\App\TicketStateManagement\TicketState::PENDING->value)
+             <span class="badge bg-warning">در انتظار رسیدگی</span>
              @break
-         @case(\App\Enums\Ticket\TicketStatus::PENDING->value)
+         @case(\App\TicketStateManagement\TicketState::ACCEPTED->value)
              <span class="badge bg-primary">در حال رسیدگی</span>
              @break
-         @case(\App\Enums\Ticket\TicketStatus::CLOSED->value)
-             <span class="badge bg-success">بسته شده</span>
+         @case(\App\TicketStateManagement\TicketState::DELEGATED->value)
+             <span class="badge bg-info">ارجاع شده</span>
+             @break
+         @case(\App\TicketStateManagement\TicketState::WEBSERVICE->value)
+             <span class="badge bg-secondary">ارسال شده به وب سرویس</span>
+             @break
+         @case(\App\TicketStateManagement\TicketState::REJECTED->value)
+             <span class="badge bg-danger">رد شده</span>
              @break
      @endswitch
 </div>

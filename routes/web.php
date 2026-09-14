@@ -38,12 +38,6 @@ Route::middleware(['auth', 'verified'])->group(function(){
     Route::prefix('ticket/')->name('ticket.')->group(function(){
         Route::get('/', \App\Livewire\Ticket\Index::class)->name('index');
         Route::get('/create', \App\Livewire\Ticket\Create::class)->name('create');
-        Route::get('/close/{ticket}', \App\Http\Controllers\CloseTicketController::class)->name('close');
-    });
-
-    // cartable
-    Route::prefix('cartable/')->name('cartable.')->group(function(){
-        Route::get('/', \App\Livewire\Cartable\Index::class)->name('index');
     });
 
     // chat

@@ -3,14 +3,18 @@
 namespace App\Models;
 
 use App\Events\NewTicket;
-use App\Observers\TicketObserver;
 use App\Models\Scopes\TicketUserTypeScope;
+use App\TicketStateManagement\TicketState;
+use App\TicketStateManagement\TicketStateInterface;
+use App\TicketStateManagement\States\AcceptedState;
+use App\TicketStateManagement\States\DelegatedState;
+use App\TicketStateManagement\States\PendingState;
+use App\TicketStateManagement\States\RejectedState;
+use App\TicketStateManagement\States\WebserviceState;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 #[ScopedBy(TicketUserTypeScope::class)]
@@ -23,11 +27,6 @@ class Ticket extends Model
     protected $dispatchesEvents = [
         'created' => NewTicket::class
     ];
-
-    protected static function booted(): void
-    {
-        static::observe(TicketObserver::class);
-    }
 
     /**
      * Specify the workgroup to which the ticket was sent
@@ -71,7 +70,20 @@ class Ticket extends Model
 
     public function chat(): Chat|null
     {
-        return Chat::where('meta', Ticket::class . ",{$this->id}")
+        return Chat::withoutGlobalScopes()
+            ->where('meta', Ticket::class . ",{$this->id}")
             ->first();
+    }
+
+    public function stateManagement(): TicketStateInterface
+    {
+        return match (TicketState::tryFrom($this->status)) {
+            TicketState::PENDING => app(PendingState::class, ['ticket' => $this]),
+            TicketState::ACCEPTED => app(AcceptedState::class, ['ticket' => $this]),
+            TicketState::DELEGATED => app(DelegatedState::class, ['ticket' => $this]),
+            TicketState::WEBSERVICE => app(WebserviceState::class, ['ticket' => $this]),
+            TicketState::REJECTED => app(RejectedState::class, ['ticket' => $this]),
+            default => throw new \UnexpectedValueException("Unknown ticket state: {$this->status}"),
+        };
     }
 }

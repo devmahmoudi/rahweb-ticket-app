@@ -3,6 +3,7 @@
 namespace App\Events;
 
 use App\Models\Ticket;
+use App\TicketStateManagement\TicketState;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -11,7 +12,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class TicketClosed implements ShouldBroadcast
+class TicketStateChanged
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -19,18 +20,22 @@ class TicketClosed implements ShouldBroadcast
      * Create a new event instance.
      */
     public function __construct(
-        public Ticket $ticket
-    ){}
+        public Ticket $ticket,
+        public TicketState $state,
+    )
+    {
+        //
+    }
 
     /**
      * Get the channels the event should broadcast on.
      *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
+     * @return array<int, Channel>
      */
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel("workgroup.{$this->ticket->workgroup_id}")
+            new PrivateChannel('channel-name'),
         ];
     }
 }

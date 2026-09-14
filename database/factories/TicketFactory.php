@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Enums\Ticket\TicketStatus;
 use App\Models\User;
 use App\Models\Workgroup;
+use App\TicketStateManagement\TicketState;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -25,7 +25,7 @@ class TicketFactory extends Factory
             'workgroup_id' => Workgroup::factory(),
             'recipient_id' => User::factory(),
             'user_id' => User::factory()->customer(),
-            'status' => $this->faker->randomElement(array_values(TicketStatus::cases()))
+            'status' => $this->faker->randomElement(array_values(TicketState::cases()))
         ];
     }
 
@@ -48,32 +48,9 @@ class TicketFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [
-                'status' => TicketStatus::PENDING->value,
+                'status' => TicketState::PENDING->value,
             ];
         });
     }
 
-    /**
-     * Indicate that the ticket is closed.
-     */
-    public function closed(): Factory
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => TicketStatus::CLOSED->value,
-            ];
-        });
-    }
-
-    /**
-     * Indicate that the ticket is waiting for accept with user.
-     */
-    public function waiting(): Factory
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => TicketStatus::WAITING->value,
-            ];
-        });
-    }
 }
