@@ -7,7 +7,7 @@ Rahweb Ticket is a customer support application built with Laravel and Livewire.
 - PHP 8.4 or newer
 - Composer
 - Node.js and pnpm (or npm)
-- SQLite, or another database supported by Laravel
+- PostgreSQL or MySQL is recommended for this project; SQLite is only suitable for very light local testing
 
 ## Installation
 
@@ -32,7 +32,33 @@ Rahweb Ticket is a customer support application built with Laravel and Livewire.
 
    On Windows PowerShell, use `Copy-Item .env.example .env` instead of `cp`.
 
-4. Configure the database in `.env`. The default configuration uses SQLite. Create the database file if it does not exist:
+4. Configure the database in `.env`.
+
+   > Note: SQLite is not recommended for this project. It can struggle with concurrent queries and may throw `database is locked` errors in normal use. For a more reliable setup, prefer PostgreSQL or MySQL.
+
+   Example `.env` configuration for PostgreSQL:
+
+   ```env
+   DB_CONNECTION=pgsql
+   DB_HOST=127.0.0.1
+   DB_PORT=5432
+   DB_DATABASE=rahweb_ticket
+   DB_USERNAME=postgres
+   DB_PASSWORD=your_password
+   ```
+
+   Example `.env` configuration for MySQL:
+
+   ```env
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=rahweb_ticket
+   DB_USERNAME=root
+   DB_PASSWORD=your_password
+   ```
+
+   If you still use SQLite for a quick local test, create the database file first:
 
    ```powershell
    New-Item database/database.sqlite -ItemType File
@@ -48,48 +74,46 @@ Rahweb Ticket is a customer support application built with Laravel and Livewire.
 
 ## Running the application
 
-Start the Laravel development server:
+After the installation steps above are complete, start the services you need in separate terminals.
 
 ```bash
 php artisan serve
-```
-
-In a second terminal, start Vite for frontend assets:
-
-```bash
 pnpm dev
+php artisan reverb:start
+php artisan queue:work
+php artisan queue:work --queue=webservice
+php artisan schedule:work
 ```
 
 Open [http://localhost:8000](http://localhost:8000). The root URL redirects to the dashboard after authentication.
 
-The application is configured to use Laravel Reverb for broadcasting. Start it when real-time chat or events are needed:
-
-```bash
-php artisan reverb:start
-```
-
 For a production frontend build, run `pnpm build`.
+
+## Architecture and feature documentation
+
+- [Send Ticket to Webservice](docs/send-ticket-to-webservice.md)
+- [Static RBAC](docs/static-rbac.md)
+- [Ticket State Management](docs/ticket-state-management.md)
+- [User Notifications](docs/user-notifications.md)
 
 ## Seeded users
 
 `php artisan migrate --seed` creates the following development accounts. Every account uses the password `123456789`.
 
-| Role | Name | Email | Access |
+| Role | Name | Email | Notes |
 | --- | --- | --- | --- |
-| Administrator | Test Admin | `admin@example.com` | All seeded permissions |
-| Operator | Test Operator | `operator@example.com` | Chat, customers, media, messages, tasks, and tickets |
-| Customer | Test Customer | `customer@example.com` | Customer account access |
+| Superadmin | Test Superadmin | `superadmin@example.com` | Created by `DatabaseSeeder::seedSuperadminUser()` |
+| Operator | Test Operator | `operator@example.com` | Created by `DatabaseSeeder::seedOperatorUser()` and attached to the seeded workgroup `پشتیبانی` |
+| Customer | Test Customer | `customer@example.com` | Created by `DatabaseSeeder::seedCustomerUser()` |
 
 These credentials are for local development only and must be changed or removed before deploying the application.
 
 ## Main areas
 
 - Dashboard and profile management
-- Role and permission administration
 - Workgroups and user assignment
-- Operator and customer management
-- Ticket creation and closing
 - Real-time chat and messaging
+- Tickets
 - Media uploads
 
 ## Useful commands
