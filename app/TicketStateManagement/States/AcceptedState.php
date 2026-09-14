@@ -8,15 +8,6 @@ use App\TicketStateManagement\TicketStateInterface;
 
 class AcceptedState extends State implements TicketStateInterface
 {
-
-    /**
-     * @inheritDoc
-     */
-    public function claim(User $actor): void
-    {
-        $this->unsupported('claim');
-    }
-
     /**
      * @inheritDoc
      */
@@ -36,20 +27,8 @@ class AcceptedState extends State implements TicketStateInterface
     /**
      * @inheritDoc
      */
-    public function publishToWebService(User $actor): void
-    {
-        $this->unsupported('publishToWebService');
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function reject(): void
     {
         $this->rejectTransition();
     }
-
-    /**
-     * @inheritDoc
-     */
 }

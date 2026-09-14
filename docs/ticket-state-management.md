@@ -1,11 +1,16 @@
 # Ticket State Management
 
 ## Explanation
-For ticket state management, we use the **State Design Pattern**.
+For ticket state management, we use the **Template Method design pattern**.
 
 **Context**: [Ticket](../app/Models/Ticket.php)
 **Interface**: [TicketStateInterface](../app/TicketStateManagement/TicketStateInterface.php)
-**ConcreteStates**: [States](../app/TicketStateManagement/States)
+**Template Class**: [State](../app/TicketStateManagement/States/State.php)
+**Concrete States**: [States](../app/TicketStateManagement/States)
+
+In this design, [State.php](../app/TicketStateManagement/States/State.php) acts as the shared template. It defines the common transition workflow such as `transition()`, `rejectTransition()`, and the default method signatures (`claim()`, `delegateTo()`, `publishToWebService()`, `reject()`).
+
+Each concrete state class — such as [PendingState](../app/TicketStateManagement/States/PendingState.php), [AcceptedState](../app/TicketStateManagement/States/AcceptedState.php), [DelegatedState](../app/TicketStateManagement/States/DelegatedState.php), [WebserviceState](../app/TicketStateManagement/States/WebserviceState.php), and [RejectedState](../app/TicketStateManagement/States/RejectedState.php) — overrides only the transitions it allows, while the rest are handled by the base template through `unsupported()`.
 
 ## All Possible States For A Ticket
 - PENDING: When a new ticket submit by user and wait for claim by an operator
