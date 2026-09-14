@@ -6,6 +6,20 @@
     <x-slot:script>
         <script src="{{ asset('assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
 
+        @php
+            $ticketStateLabels = [
+                \App\TicketStateManagement\TicketState::PENDING->value => 'در انتظار رسیدگی',
+                \App\TicketStateManagement\TicketState::ACCEPTED->value => 'در حال رسیدگی',
+                \App\TicketStateManagement\TicketState::DELEGATED->value => 'ارجاع شده',
+                \App\TicketStateManagement\TicketState::WEBSERVICE->value => 'ارسال شده به وب سرویس',
+                \App\TicketStateManagement\TicketState::REJECTED->value => 'رد شده',
+            ];
+            $ticketStateCounts = array_map(
+                fn (string $state) => \App\Facades\TicketRepositoryFacade::count(TicketState: $state),
+                array_keys($ticketStateLabels),
+            );
+        @endphp
+
         <script>
             /**
              * Analytics Dashboard
@@ -75,7 +89,13 @@
                         width: 0,
                         lineCap: 'round'
                     },
-                    colors: [config.colors.primary, config.colors.warning, config.colors.success],
+                    colors: [
+                        config.colors.primary,
+                        config.colors.warning,
+                        config.colors.info,
+                        config.colors.success,
+                        config.colors.danger,
+                    ],
                     plotOptions: {
                         pie: {
                             donut: {
@@ -131,17 +151,9 @@
                 const ticketImpressionEle = document.querySelector('#ticket-impression');
                 const ticketImpressionConfig = impressionChartConfig
 
-                impressionChartConfig.series = [
-                    {{ \App\Facades\TicketRepositoryFacade::count(TicketState: \App\TicketStateManagement\TicketState::PENDING->value) }},
-                    {{ \App\Facades\TicketRepositoryFacade::count(TicketState: \App\TicketStateManagement\TicketState::PENDING->value) }},
-                    {{ \App\Facades\TicketRepositoryFacade::count(TicketState: \App\TicketStateManagement\TicketState::REJECTED->value) }},
-                ]
+                impressionChartConfig.series = @json($ticketStateCounts)
 
-                impressionChartConfig.labels = [
-                    '{{ \App\TicketStateManagement\TicketState::PENDING->value }}',
-                    '{{ \App\TicketStateManagement\TicketState::PENDING->value }}',
-                    '{{ \App\TicketStateManagement\TicketState::REJECTED->value}}'
-                ]
+                impressionChartConfig.labels = @json(array_values($ticketStateLabels))
 
                 if (typeof ticketImpressionEle !== undefined && ticketImpressionEle !== null) {
                     const ticketImpressionChart = new ApexCharts(ticketImpressionEle, ticketImpressionConfig);
