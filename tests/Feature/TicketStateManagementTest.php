@@ -46,11 +46,14 @@ class TicketStateManagementTest extends TestCase
         $target = User::factory()->superadmin()->create();
         $ticket = Ticket::factory()->create(['status' => TicketState::ACCEPTED->value]);
         $chat = Chat::factory()->create(['meta' => Ticket::class . ",{$ticket->id}"]);
+        $chat->members()->attach($actor->id);
 
         $ticket->stateManagement()->delegateTo($actor, $target);
 
         $this->assertSame(TicketState::DELEGATED->value, $ticket->fresh()->status);
         $this->assertSame($target->id, $ticket->fresh()->recipient_id);
+        $this->assertDatabaseMissing('chat_user', ['chat_id' => $chat->id, 'user_id' => $actor->id]);
+        $this->assertDatabaseHas('chat_user', ['chat_id' => $chat->id, 'user_id' => $target->id]);
         Event::assertDispatched(TicketStateChanged::class);
         $this->assertDatabaseHas('messages', ['chat_id' => $chat->id, 'body' => "تیکت شما تایید و به  {$target->name} منتقل شده است."]);
     }

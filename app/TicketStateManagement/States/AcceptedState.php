@@ -23,6 +23,13 @@ class AcceptedState extends State implements TicketStateInterface
     public function delegateTo(User $actor, User $target): void
     {
         $this->ticket->update(['recipient_id' => $target->id]);
+
+        $chat = $this->ticket->chat();
+        if ($chat) {
+            $chat->members()->detach($actor->id);
+            $chat->members()->attach($target->id);
+        }
+
         $this->transition(TicketState::DELEGATED, "تیکت شما تایید و به  {$target->name} منتقل شده است.", $actor);
     }
 

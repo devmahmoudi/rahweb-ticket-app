@@ -26,3 +26,4 @@ For ticket state management, we use the **State Design Pattern**.
 - Ticket state transition options, should display as button in tickets table - based ticket current [State](../app/TicketStateManagement/TicketState.php) and ask confirmation before submit
 - Ticket current [State](../app/TicketStateManagement/TicketStateInterface.php) should automatically load in accessor and should available with straightforward syntax $ticket->stateManagement():[TicketStateInterface](../app/TicketStateManagement/TicketStateInterface.php)
 - Operators should, can change status bulk of tickets
+- When a ticket state transits from [AcceptedState](../app/TicketStateManagement/States/AcceptedState.php) to [DelegatedState](../app/TicketStateManagement/States/DelegatedState.php), actor user should detach from the ticket chat and target user should attach to the chat
