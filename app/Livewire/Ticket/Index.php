@@ -5,7 +5,6 @@ namespace App\Livewire\Ticket;
 use App\Enums\User\UserType;
 use App\Models\Ticket;
 use App\Models\User;
-use App\Repositories\TicketRepository;
 use App\TicketStateManagement\BulkTicketTransitionService;
 use App\TicketStateManagement\TicketState;
 use Livewire\Attributes\Url;
@@ -14,8 +13,6 @@ use Livewire\Component;
 class Index extends Component
 {
     public const CARTABLE_FILTER = 'cartable';
-
-    private TicketRepository $ticketRepository;
 
     private BulkTicketTransitionService $bulkTicketTransitionService;
 
@@ -34,7 +31,6 @@ class Index extends Component
 
     public function __construct()
     {
-        $this->ticketRepository = app()->make(TicketRepository::class);
         $this->bulkTicketTransitionService = app()->make(BulkTicketTransitionService::class);
     }
 
@@ -50,7 +46,7 @@ class Index extends Component
     {
         $this->authorize('delete', $ticket);
 
-        $this->ticketRepository->delete($ticket);
+        $ticket->delete();
     }
 
     public function getListeners(): array

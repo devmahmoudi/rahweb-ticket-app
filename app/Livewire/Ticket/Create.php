@@ -4,7 +4,6 @@ namespace App\Livewire\Ticket;
 
 use App\Models\Ticket;
 use App\Models\Workgroup;
-use App\Repositories\TicketRepository;
 use App\Repositories\WorkgroupRepository;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Validate;
@@ -16,8 +15,6 @@ class Create extends Component
     use WithFileUploads;
 
     private WorkgroupRepository $workgroupRepository;
-
-    private TicketRepository $ticketRepository;
 
     #[Validate(['required', 'max:255', 'string'])]
     public string $title;
@@ -35,7 +32,6 @@ class Create extends Component
     {
         $this->workgroupRepository = app()->make(WorkgroupRepository::class);
 
-        $this->ticketRepository = app()->make(TicketRepository::class);
     }
 
     public function store()

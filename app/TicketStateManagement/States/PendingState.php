@@ -3,8 +3,6 @@
 namespace App\TicketStateManagement\States;
 
 use App\Models\User;
-use App\Repositories\Chat\ChatRepository;
-use App\Repositories\TicketRepository;
 use App\TicketStateManagement\TicketState;
 use App\TicketStateManagement\TicketStateInterface;
 use Illuminate\Support\Facades\DB;

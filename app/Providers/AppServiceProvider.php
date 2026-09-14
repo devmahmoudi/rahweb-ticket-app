@@ -39,8 +39,5 @@ class AppServiceProvider extends ServiceProvider
                or
                $user->type == UserType::SUPERADMIN->value;
         });
-
-        app()->singleton('ticket-repository', fn($app) => $app->make(\App\Repositories\TicketRepository::class));
-
     }
 }
