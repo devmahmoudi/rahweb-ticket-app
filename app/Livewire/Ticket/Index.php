@@ -36,7 +36,7 @@ class Index extends Component
 
     public function openChat(Ticket $ticket)
     {
-        if ($ticket->user_id != auth()->id() && $ticket->status == TicketState::PENDING)
+        if ($ticket->user_id != auth()->id() && $ticket->status == TicketState::PENDING->value)
             $ticket->stateManagement()->claim(auth()->user());
 
         $this->redirect(route('chat', $ticket->chat));

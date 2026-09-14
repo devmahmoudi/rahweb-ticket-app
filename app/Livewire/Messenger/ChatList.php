@@ -2,13 +2,10 @@
 
 namespace App\Livewire\Messenger;
 
-use App\Repositories\Chat\ChatRepository;
 use Illuminate\Database\Eloquent\Collection;
 
 class ChatList extends Component
 {
-    private ChatRepository $chatRepository;
-
     public Collection $chats;
 
     public string $search;
@@ -21,9 +18,7 @@ class ChatList extends Component
 
     public function mount()
     {
-        $this->chatRepository = app()->make(ChatRepository::class);
-
-        $this->chats = $this->chatRepository->all();
+        $this->chats = \App\Models\Chat::all();
 
         if(isset($this->chat))
             $this->loadMessages($this->chat);

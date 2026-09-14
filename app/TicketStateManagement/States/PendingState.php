@@ -27,6 +27,8 @@ class PendingState extends State implements TicketStateInterface
                 }
 
                 $chat->members()->attach($actor);
+
+                $chat->save();
             });
 
             $this->transition(TicketState::ACCEPTED, "تیکت شما توسط {$actor->name} در حال رسیدگی است", $actor);
