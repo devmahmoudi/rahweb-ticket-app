@@ -5,6 +5,8 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\User\UserType;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -104,5 +106,20 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isOperator():bool
     {
         return $this->type == UserType::OPERATOR->value;
+    }
+
+    #[Scope]
+    protected function customer(Builder $builder): void {
+        $builder->where('type', UserType::CUSTOMER->value);
+    }
+
+    #[Scope]
+    protected function operator(Builder $builder): void {
+        $builder->where('type', UserType::OPERATOR->value);
+    }
+
+    #[Scope]
+    protected function superadmin(Builder $builder): void {
+        $builder->where('type', UserType::SUPERADMIN->value);
     }
 }

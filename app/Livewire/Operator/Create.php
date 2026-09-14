@@ -6,7 +6,6 @@ use App\Enums\User\UserType;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use App\Models\Workgroup;
-use App\Repositories\UserRepository;
 use App\Repositories\WorkgroupRepository;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Attributes\Validate;
@@ -36,13 +35,11 @@ class Create extends Component
     {
         $this->validate();
 
-        $repository = app()->make(UserRepository::class);
-
         $this->password = Hash::make($this->password);
 
         $mailConfigured = config('mail.default') !== 'log';
 
-        $user = $repository->create(array_merge(
+        $user = User::create(array_merge(
             $this->only(['email', 'name', 'password']),
             ['type' => UserType::CUSTOMER->value]
         ));
@@ -56,7 +53,7 @@ class Create extends Component
         }
 
         $user->workgroups()->sync($this->workgroup_ids);
-        $repository->update($user, ['type' => UserType::OPERATOR->value]);
+        $user->update(['type' => UserType::OPERATOR->value]);
 
         session()->flash('alert-success', 'اوپراتور جدید ایجاد شد !');
 

@@ -4,7 +4,6 @@ namespace App\Livewire\Operator;
 
 use App\Models\User;
 use App\Models\Workgroup;
-use App\Repositories\UserRepository;
 use App\Repositories\WorkgroupRepository;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Attributes\Validate;
@@ -33,14 +32,12 @@ class Edit extends Component
     {
         $this->validate();
 
-        $repository = app()->make(UserRepository::class);
-
         $fields = $this->only(['name']);
 
         if(!empty($this->password))
             $fields['password'] = Hash::make($this->password);
 
-        $repository->update($this->operator, $fields) &&
+        $this->operator->update($fields) &&
         $this->operator->workgroups()->sync($this->workgroup_ids) ?
             session()->flash('alert-success', 'اوپراتور ویرایش شد !'):
             session()->flash('alert-danger', 'وجود خطا در سرور');
