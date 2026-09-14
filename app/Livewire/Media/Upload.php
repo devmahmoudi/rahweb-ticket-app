@@ -3,17 +3,13 @@
 namespace App\Livewire\Media;
 
 use App\Models\Media;
-use App\Repositories\MediaRepository;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
-use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 class Upload extends Component
 {
     use WithFileUploads;
-
-    private MediaRepository $mediaRepository;
 
     #[Validate(['nullable', 'max:255'])]
     public string $name;
@@ -28,7 +24,7 @@ class Upload extends Component
         if(!$path = $this->file->store(config('media.directory'), config('media.disk')))
             session()->flash('alert-danger', 'وجود خطا در فرایند ذخیره سازی فایل !');
 
-        $this->mediaRepository->create([
+        Media::create([
             'path' => $path,
             'name' => $this->name ?? $this->file->getClientOriginalName(),
             'creator_id' => auth()->id(),
@@ -41,7 +37,6 @@ class Upload extends Component
 
     public function __construct()
     {
-        $this->mediaRepository = app()->make(MediaRepository::class);
     }
 
     public function mount()
