@@ -12,42 +12,6 @@ use Illuminate\Support\Facades\DB;
 
 class TicketRepository
 {
-    /**
-     * Accept ticket for handling and answer to customer often it does with operator
-     *
-     * @param Ticket $ticket
-     * @param User|null $acceptable the user/operator who accept ticket, current user id will set if it is null
-     * @return bool
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     */
-    public function accept(Ticket $ticket, ?User $acceptable = null):bool
-    {
-        return cache()->lock(config('ticket.accept-cache-lock-prefix') . $ticket->id, 2)->block(2, function () use ($ticket, $acceptable): bool {
-            $ticket->refresh();
-
-            if ($ticket->status !== TicketState::PENDING->value) {
-                return false;
-            }
-
-            DB::beginTransaction();
-
-            $recipient = $acceptable ?? auth()->user();
-
-            $ticket->stateManagement()->claim($recipient);
-
-            if (!$chat = $this->findRelevantChat($ticket)) {
-                DB::rollBack();
-                return false;
-            }
-
-            app(ChatRepository::class)->joinMember($chat, $recipient);
-
-            DB::commit();
-
-            return true;
-        });
-    }
-
     public function findRelevantChat(Ticket $ticket):Chat|null
     {
         return Chat::withoutGlobalScopes()->where('meta', Ticket::class . ",$ticket->id")->first();

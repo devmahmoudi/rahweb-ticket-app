@@ -41,7 +41,7 @@ class Index extends Component
     public function openChat(Ticket $ticket)
     {
         if ($ticket->user_id != auth()->id()) {
-            $this->ticketRepository->accept($ticket);
+            $ticket->stateManagement()->claim(auth()->user());
         }
 
         $repository = app()->make(TicketRepository::class);

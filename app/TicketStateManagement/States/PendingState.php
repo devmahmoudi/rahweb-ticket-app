@@ -3,9 +3,11 @@
 namespace App\TicketStateManagement\States;
 
 use App\Models\User;
+use App\Repositories\Chat\ChatRepository;
 use App\Repositories\TicketRepository;
 use App\TicketStateManagement\TicketState;
 use App\TicketStateManagement\TicketStateInterface;
+use Illuminate\Support\Facades\DB;
 
 class PendingState extends State implements TicketStateInterface
 {
@@ -14,12 +16,29 @@ class PendingState extends State implements TicketStateInterface
      */
     public function claim(User $actor): void
     {
-        $this->ticket->update(['recipient_id' => $actor->id]);
+        $ticketToClaim = $this->ticket;
 
-        $ticketRepository = app(TicketRepository::class);
-        $chat = $ticketRepository->findRelevantChat(($this->ticket));
-        $chat->members()->attach($actor);
+        cache()->lock(config('ticket.accept-cache-lock-prefix') . $this->ticket->id, 2)->block(2, function () use ($ticketToClaim, $actor): bool {
+            $ticketToClaim->refresh();
 
-        $this->transition(TicketState::ACCEPTED, "تیکت شما توسط {$actor->name} در حال رسیدگی است", $actor);
+            DB::beginTransaction();
+
+            $this->ticket->update(['recipient_id' => $actor->id]);
+
+            $ticketRepository = app()->make(TicketRepository::class);
+
+            if (!$chat = $ticketRepository->findRelevantChat($ticketToClaim)) {
+                DB::rollBack();
+                throw new \Error("Chat for ticket $ticketToClaim->id not found");
+            }
+
+            $chat->members()->attach($actor);
+
+            DB::commit();
+
+            $this->transition(TicketState::ACCEPTED, "تیکت شما توسط {$actor->name} در حال رسیدگی است", $actor);
+
+            return true;
+        });
     }
 }
