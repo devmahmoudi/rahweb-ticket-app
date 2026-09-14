@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\Ticket;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -14,7 +15,7 @@ class SendTicketToWebserviceJobSucceed extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct(public Ticket $ticket)
     {
         //
     }
@@ -26,7 +27,7 @@ class SendTicketToWebserviceJobSucceed extends Notification
      */
     public function via(object $notifiable): array
     {
-        return [];
+        return ["database"];
     }
 
     /**
@@ -37,7 +38,7 @@ class SendTicketToWebserviceJobSucceed extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            "ticket_id" => $this->ticket->id
         ];
     }
 }

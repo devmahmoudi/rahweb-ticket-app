@@ -39,12 +39,12 @@ class SendTicketToWebservice implements ShouldQueue
         }
 
         $targets = collect([
-            $this->ticket->owner()->first(),
-            $this->ticket->recipient()->first(),
+            $this->ticket->owner,
+            $this->ticket->recipient,
         ])->filter()->unique('id')->values();
 
         foreach ($targets as $target) {
-            Notification::send($target, new SendTicketToWebserviceJobSucceed());
+            Notification::send($target, new SendTicketToWebserviceJobSucceed($this->ticket));
         }
     }
 }
