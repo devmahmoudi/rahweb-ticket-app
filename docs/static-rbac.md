@@ -14,4 +14,5 @@ We don't need **dynamic** Role Base Access Control for this tiny project that in
 - **Customer** users can send (create) ticket
 - **Operator** users can visit information of **Customer** who has assigned ticket to itself
 - **Operator** users can ask for close ticket that are assigned to itself
+- **Operator** users can only download [Media](../app/Models/Media.php)
 - **Superadmin** users can do everything

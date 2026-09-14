@@ -38,12 +38,7 @@ class MediaPolicy
      */
     public function upload(User $user): bool
     {
-        if ($user->isCustomer())
-            return false;
-
-        if ($user->isSuperadmin())
-            return true;
-        return $user->isOperator();
+        return $user->isSuperadmin();
     }
 
     /**
@@ -51,12 +46,7 @@ class MediaPolicy
      */
     public function update(User $user, Media $media): bool
     {
-        if ($user->isCustomer())
-            return false;
-
-        if ($user->isSuperadmin())
-            return true;
-        return $user->isOperator();
+        return $user->isSuperadmin();
     }
 
     /**
@@ -64,11 +54,6 @@ class MediaPolicy
      */
     public function delete(User $user, Media $media): bool
     {
-        if ($user->isCustomer())
-            return false;
-
-        if ($user->isSuperadmin())
-            return true;
-        return $user->isOperator();
+        return $user->isSuperadmin();
     }
 }

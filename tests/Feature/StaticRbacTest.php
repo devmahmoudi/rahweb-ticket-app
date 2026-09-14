@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\User\UserType;
 use App\Models\Chat;
+use App\Models\Media;
 use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
@@ -67,5 +68,16 @@ class StaticRbacTest extends TestCase
         $this->assertTrue(Gate::forUser($superadmin)->allows('create', Ticket::class));
         $this->assertTrue(Gate::forUser($superadmin)->allows('update', $ticket));
         $this->assertTrue(Gate::forUser($superadmin)->allows('view', $ticket));
+    }
+
+    public function test_operator_can_only_download_media(): void
+    {
+        $operator = User::factory()->operator()->create();
+        $media = Media::factory()->create();
+
+        $this->assertTrue(Gate::forUser($operator)->allows('download', $media));
+        $this->assertFalse(Gate::forUser($operator)->allows('upload', Media::class));
+        $this->assertFalse(Gate::forUser($operator)->allows('update', $media));
+        $this->assertFalse(Gate::forUser($operator)->allows('delete', $media));
     }
 }
