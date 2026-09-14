@@ -21,6 +21,15 @@ class NotificationBell extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.notification-bell');
+        $notifications = collect();
+
+        if (auth()->check()) {
+            $notifications = auth()->user()->unreadNotifications()->latest()->take(10)->get();
+        }
+
+        return view('components.notification-bell', [
+            'notifications' => $notifications,
+            'unreadCount' => $notifications->count(),
+        ]);
     }
 }

@@ -38,7 +38,9 @@ class SendTicketToWebserviceJobSucceed extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            "ticket_id" => $this->ticket->id
+            'ticket_id' => $this->ticket->id,
+            'title' => 'تیکت #' . $this->ticket->id,
+            'message' => 'تیکت شما با موفقیت به وب سرویس ارسال شد.',
         ];
     }
 }

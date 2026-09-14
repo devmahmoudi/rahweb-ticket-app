@@ -40,6 +40,16 @@ Route::middleware(['auth', 'verified'])->group(function(){
         Route::get('/create', \App\Livewire\Ticket\Create::class)->name('create');
     });
 
+    Route::get('/notifications', \App\Livewire\Notification\Index::class)->name('notifications.index');
+
+    Route::post('/notifications/{notification}/read', function (string $notification) {
+        $databaseNotification = auth()->user()->notifications()->whereKey($notification)->firstOrFail();
+
+        $databaseNotification->markAsRead();
+
+        return back();
+    })->name('notifications.read');
+
     // chat
     Route::prefix('/chat')->group(function(){
        Route::get('/{chat?}', \App\Livewire\Messenger\Chat::class)->name('chat');

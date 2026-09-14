@@ -74,6 +74,8 @@ new class extends Component
                 </li>
                 <!--/ Style Switcher -->
 
+                <x-notification-bell />
+
                 <!-- User -->
                 <li class="nav-item navbar-dropdown dropdown-user dropdown">
                     <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
