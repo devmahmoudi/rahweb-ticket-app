@@ -20,6 +20,8 @@ class ChatFactory extends Factory
         return [
             'link' => $this->faker->unique()->uuid,
             'type' => $this->faker->randomElement(array_values(ChatType::cases())),
+            'chatable_type' => \App\Models\Ticket::class,
+            'chatable_id' => 1,
         ];
     }
 }

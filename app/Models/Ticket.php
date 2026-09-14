@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 #[ScopedBy(TicketUserTypeScope::class)]
 #[ObservedBy(TicketObserver::class)]
@@ -73,11 +74,9 @@ class Ticket extends Model
         return $this->morphMany(Message::class, 'messageable');
     }
 
-    public function chat(): Chat|null
+    public function chat(): MorphOne
     {
-        return Chat::withoutGlobalScopes()
-            ->where('meta', Ticket::class . ",{$this->id}")
-            ->first();
+        return $this->morphOne(Chat::class, 'chatable');
     }
 
     #[Scope]

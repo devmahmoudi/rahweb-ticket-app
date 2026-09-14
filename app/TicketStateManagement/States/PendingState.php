@@ -21,20 +21,17 @@ class PendingState extends State implements TicketStateInterface
         cache()->lock(config('ticket.accept-cache-lock-prefix') . $this->ticket->id, 2)->block(2, function () use ($ticketToClaim, $actor): bool {
             $ticketToClaim->refresh();
 
-            DB::beginTransaction();
+            DB::transaction(function () use ($ticketToClaim, $actor): void {
+                $this->ticket->update(['recipient_id' => $actor->id]);
 
-            $this->ticket->update(['recipient_id' => $actor->id]);
+                $ticketRepository = app()->make(TicketRepository::class);
 
-            $ticketRepository = app()->make(TicketRepository::class);
+                if (!$chat = $ticketRepository->findRelevantChat($ticketToClaim)) {
+                    throw new \Error("Chat for ticket $ticketToClaim->id not found");
+                }
 
-            if (!$chat = $ticketRepository->findRelevantChat($ticketToClaim)) {
-                DB::rollBack();
-                throw new \Error("Chat for ticket $ticketToClaim->id not found");
-            }
-
-            $chat->members()->attach($actor);
-
-            DB::commit();
+                $chat->members()->attach($actor);
+            });
 
             $this->transition(TicketState::ACCEPTED, "تیکت شما توسط {$actor->name} در حال رسیدگی است", $actor);
 

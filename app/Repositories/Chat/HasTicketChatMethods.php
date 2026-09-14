@@ -12,25 +12,27 @@ trait HasTicketChatMethods
 {
     public function createForTicket(Ticket $ticket):Chat|false
     {
-        DB::beginTransaction();
+        return DB::transaction(function () use ($ticket): Chat|false {
+            $chatData = [
+                'name' => config('ticket.chat-name-prefix') . Str::words($ticket->title, 5),
+                'meta' => Ticket::class . ",{$ticket->id}",
+                'chatable_type' => Ticket::class,
+                'chatable_id' => $ticket->id,
+                'link' => config('ticket.chat-link-prefix') . $ticket->id,
+            ];
 
-        $chatData = [
-            'name' => config('ticket.chat-name-prefix') . Str::words($ticket->title, 5),
-            'meta' => Ticket::class . ",{$ticket->id}",
-            'link' => config('ticket.chat-link-prefix') . $ticket->id,
-        ];
+            if (!$chat = $this->create($chatData, [$ticket->user_id])) {
+                return false;
+            }
 
-        if(!$chat = $this->create($chatData, [auth()->id()]))
-            return false;
+            $messageRepository = app()->makeWith(MessageRepository::class, ['chat' => $chat]);
 
-        $messageRepository = app()->makeWith(MessageRepository::class, ['chat' => $chat]);
+            if (!$messageRepository->createInitialTicketMessage($ticket)) {
+                return false;
+            }
 
-        if(!$messageRepository->createInitialTicketMessage($ticket))
-            return false;
-
-        DB::commit();
-
-        return $chat;
+            return $chat;
+        });
     }
 
     public function findRelevantTicket(Chat|int $chat):Ticket|null

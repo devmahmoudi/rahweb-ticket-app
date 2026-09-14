@@ -14,7 +14,10 @@ class TicketRepository
 {
     public function findRelevantChat(Ticket $ticket):Chat|null
     {
-        return Chat::withoutGlobalScopes()->where('meta', Ticket::class . ",$ticket->id")->first();
+        return Chat::withoutGlobalScopes()
+            ->where('chatable_type', Ticket::class)
+            ->where('chatable_id', $ticket->id)
+            ->first();
     }
 
     public function update(Ticket $ticket, array $data):bool
