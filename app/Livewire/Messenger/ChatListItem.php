@@ -3,7 +3,6 @@
 namespace App\Livewire\Messenger;
 
 use App\Models\Chat as ChatModel;
-use App\Repositories\Message\MessageRepository;
 use Livewire\Attributes\On;
 
 class ChatListItem extends Component
@@ -16,7 +15,6 @@ class ChatListItem extends Component
 
     public int $newMessagesCount = 0;
 
-    private MessageRepository $messageRepository;
 
     protected function getListeners()
     {
@@ -59,9 +57,7 @@ class ChatListItem extends Component
 
     public function newMessageReceived($event)
     {
-        $repository = app()->makeWith(MessageRepository::class, ['chat', $this->chat]);
-
-        $this->lastMessage = $repository->find($event['id'])->body;
+        $this->lastMessage = $this->chat->messages()->find($event['id'])->body;
 
         $this->incrementUnseenMessages();
 

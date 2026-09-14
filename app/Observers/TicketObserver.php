@@ -3,8 +3,9 @@
 namespace App\Observers;
 
 use App\Models\Chat;
+use App\Models\Message;
 use App\Models\Ticket;
-use App\Repositories\Message\MessageRepository;
+use App\View\Components\InitialTicketMessage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -29,13 +30,22 @@ class TicketObserver
 
             $chat->save();
 
-            $messageRepository = app()->makeWith(MessageRepository::class, ['chat' => $chat]);
-
-            if (!$messageRepository->createInitialTicketMessage($ticket)) {
-                return false;
-            }
+            if (!$this->createInitialTicketMessage($ticket))
+                throw new \Exception("Create initial message for ticket $ticket->id failed");
 
             return $chat;
         });
+    }
+
+    public function createInitialTicketMessage(Ticket $ticket):Message|false
+    {
+        $initialMessageBody = app()->makeWith(InitialTicketMessage::class, ['ticket' => $ticket]);
+
+        $messageData = [
+            'body' => $initialMessageBody->render()->render(),
+            'user_id' => $ticket->user_id
+        ];
+
+        return $ticket->chat->messages()->create($messageData);
     }
 }
