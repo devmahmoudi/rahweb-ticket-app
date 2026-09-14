@@ -16,6 +16,10 @@ class ChatUserScope implements Scope
     {
         $user = auth()->user();
 
+        if(!$user || $user->type === UserType::SUPERADMIN){
+            return;
+        }
+
         $builder
             ->whereHas('members', function ($query) use ($user){
                 $query->where('user_id', $user->id);

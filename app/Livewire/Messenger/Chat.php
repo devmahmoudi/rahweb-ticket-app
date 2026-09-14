@@ -3,7 +3,6 @@
 namespace App\Livewire\Messenger;
 
 use App\Models\Chat as ChatModel;
-use App\Repositories\Chat\ChatRepository;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -16,9 +15,7 @@ class Chat extends Component
     #[On('open-chat')]
     public function open(int $chatId)
     {
-        $repository = app()->make(ChatRepository::class);
-
-        $this->chat = $repository->find($chatId);
+        $this->chat = Chat::find($chatId);
     }
 
     #[On('notify-online-status')]

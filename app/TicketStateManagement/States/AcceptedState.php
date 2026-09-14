@@ -15,7 +15,7 @@ class AcceptedState extends State implements TicketStateInterface
     {
         $this->ticket->update(['recipient_id' => $target->id]);
 
-        $chat = $this->ticket->chat();
+        $chat = $this->ticket->chat;
         if ($chat) {
             $chat->members()->detach($actor->id);
             $chat->members()->attach($target->id);

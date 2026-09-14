@@ -13,9 +13,7 @@ class Index extends Component
     {
         $this->authorize('delete', $user);
 
-        $repository = app()->make(UserRepository::class);
-
-        $repository->delete($user) ?
+        $user->delete($user) ?
             session()->now('alert-success', 'کاربر حذف شد !') :
             session()->now('alert-danger', 'وجود خطا در سامانه !') ;
     }
@@ -25,9 +23,9 @@ class Index extends Component
         $this->authorize('viewAny', User::class);
     }
 
-    public function render(UserRepository $repository)
+    public function render()
     {
         return view('livewire.pages.operator.index')
-            ->with('users', $repository->allOperators());
+            ->with('users', User::customer()->paginate());
     }
 }

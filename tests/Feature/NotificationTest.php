@@ -23,7 +23,7 @@ class NotificationTest extends TestCase
             ->assertSee('1')
             ->assertSee('تیکت #' . $ticket->id)
             ->assertSee('تیکت شما با موفقیت به وب سرویس ارسال شد.')
-            ->assertSee('href="' . route('ticket.index') . '"', false);
+            ->assertSee('href="' . route('chat', $ticket->chat) . '"', false);
     }
 
     public function test_a_notification_can_be_marked_as_read_from_the_notification_bell(): void

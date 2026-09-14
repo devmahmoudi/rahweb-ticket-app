@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('link')->unique();
             $table->text('meta')->nullable()->comment('Meta data.');
             $table->string('status')->default(\App\Enums\Chat\ChatStatus::ENABLED->value)->nullable();
+            $table->morphs("chatable");
             $table->timestamps();
         });
     }

@@ -4,7 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Ticket;
 use App\Notifications\SendTicketToWebserviceJobSucceed;
-use App\Repositories\Ticket\WebServiceRepository;
+use App\Repositories\WebService\WebServiceRepository;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Notification;

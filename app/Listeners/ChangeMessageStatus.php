@@ -4,7 +4,7 @@ namespace App\Listeners;
 
 use App\Enums\Message\MessageStatus;
 use App\Events\SeenMessage;
-use App\Repositories\Message\MessageRepository;
+use App\Models\Message;
 
 class ChangeMessageStatus
 {
@@ -12,7 +12,6 @@ class ChangeMessageStatus
      * Create the event listener.
      */
     public function __construct(
-        public MessageRepository $repository
     )
     {
         //
@@ -23,8 +22,6 @@ class ChangeMessageStatus
      */
     public function handle(SeenMessage $event): void
     {
-        $message = $this->repository->find($event->messageId);
-
-        $this->repository->update($message, ['status' => MessageStatus::SEEN->value]);
+        Message::find($event->messageId)->update(['status' => MessageStatus::SEEN->value]);
     }
 }

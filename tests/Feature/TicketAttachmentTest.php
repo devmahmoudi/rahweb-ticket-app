@@ -39,8 +39,29 @@ class TicketAttachmentTest extends TestCase
 
         $this->assertTrue(Storage::disk('public')->exists($ticket->attachment_path));
 
-        $message = $ticket->chat()->messages()->firstOrFail();
+        $message = $ticket->chat->messages()->firstOrFail();
         $this->assertStringContainsString(Storage::url($ticket->attachment_path), $message->body);
+    }
+
+    public function test_ticket_chat_is_stored_as_polymorphic_relation(): void
+    {
+        $customer = User::factory()->customer()->create();
+        $workgroup = Workgroup::factory()->create();
+
+        $this->actingAs($customer);
+
+        Livewire::test(Create::class)
+            ->set('title', 'Ticket with polymorphic chat')
+            ->set('workgroup_id', $workgroup->id)
+            ->set('description', 'Test ticket description')
+            ->call('store');
+
+        $ticket = Ticket::query()->where('user_id', $customer->id)->firstOrFail();
+        $chat = $ticket->chat;
+
+        $this->assertNotNull($chat);
+        $this->assertSame(Ticket::class, $chat->chatable_type);
+        $this->assertSame($ticket->id, $chat->chatable_id);
     }
 
     public function test_ticket_attachment_requires_pdf_or_image_mime_types(): void

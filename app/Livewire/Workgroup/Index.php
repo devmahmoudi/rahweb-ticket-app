@@ -3,7 +3,6 @@
 namespace App\Livewire\Workgroup;
 
 use App\Models\Workgroup;
-use App\Repositories\WorkgroupRepository;
 use Livewire\Component;
 use Livewire\WithoutUrlPagination;
 use Livewire\WithPagination;
@@ -16,9 +15,7 @@ class Index extends Component
     {
         $this->authorize('delete', $workgroup);
 
-        $repository = app()->make(WorkgroupRepository::class);
-
-        $repository->delete($workgroup)?
+        $workgroup->delete()?
             session()->now('alert-success', 'گروه کاری حذف شد !'):
             session()->now('alert-danger', 'وجود خطا در سرور !');
     }
@@ -28,9 +25,9 @@ class Index extends Component
         $this->authorize('viewAny', Workgroup::class);
     }
 
-    public function render(WorkgroupRepository $repository)
+    public function render()
     {
         return view('livewire.pages.workgroup.index')
-            ->with('workgroups', $repository->paginate());
+            ->with('workgroups', Workgroup::paginate());
     }
 }

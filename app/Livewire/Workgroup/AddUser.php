@@ -5,7 +5,6 @@ namespace App\Livewire\Workgroup;
 use App\Enums\User\UserType;
 use App\Models\User;
 use App\Models\Workgroup;
-use App\Repositories\UserRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Component;
 
@@ -43,14 +42,14 @@ class AddUser extends Component
             ->get();
     }
 
-    public function mount(UserRepository $repository)
+    public function mount()
     {
         $this->authorize('update', $this->workgroup);
 
-        $this->users = $repository->allOperators();
+        $this->users = User::operator()->get();
     }
 
-    public function render(UserRepository $repository)
+    public function render()
     {
 
         return view('livewire.pages.workgroup.add-user');

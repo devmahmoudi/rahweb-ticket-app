@@ -3,7 +3,6 @@
 namespace App\Livewire\Workgroup;
 
 use App\Models\Workgroup;
-use App\Repositories\WorkgroupRepository;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -27,9 +26,8 @@ class Edit extends Component
             'name' => ['required', Rule::unique(Workgroup::class)->ignore($this->workgroup->id)]
         ]);
 
-        $repository = app()->make(WorkgroupRepository::class);
 
-        $repository->update($this->workgroup, $this->only(['name']))?
+        $this->workgroup->update($this->only(['name']))?
             session()->flash('alert-success', 'گروه کاری ویرایش شد !'):
             session()->flash('alert-danger', 'وجود خطا در سرور !');
 

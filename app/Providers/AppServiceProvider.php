@@ -4,8 +4,8 @@ namespace App\Providers;
 
 use App\Enums\User\UserType;
 use App\Models\User;
-use App\Repositories\Ticket\FakeWebServiceRepository;
-use App\Repositories\Ticket\WebServiceRepository;
+use App\Repositories\WebService\FakeWebServiceRepository;
+use App\Repositories\WebService\WebServiceRepository;
 use App\TicketStateManagement\States\AcceptedState;
 use App\TicketStateManagement\States\DelegatedState;
 use App\TicketStateManagement\States\PendingState;
@@ -39,8 +39,5 @@ class AppServiceProvider extends ServiceProvider
                or
                $user->type == UserType::SUPERADMIN->value;
         });
-
-        app()->singleton('ticket-repository', fn($app) => $app->make(\App\Repositories\TicketRepository::class));
-
     }
 }

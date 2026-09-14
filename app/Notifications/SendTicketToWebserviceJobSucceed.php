@@ -37,7 +37,7 @@ class SendTicketToWebserviceJobSucceed extends Notification
      */
     public function toArray(object $notifiable): array
     {
-        $chat = $this->ticket->chat();
+        $chat = $this->ticket->chat;
 
         return [
             'ticket_id' => $this->ticket->id,

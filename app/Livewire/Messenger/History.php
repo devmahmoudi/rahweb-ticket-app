@@ -3,7 +3,6 @@
 namespace App\Livewire\Messenger;
 
 use App\Enums\Message\MessageStatus;
-use App\Repositories\Message\MessageRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Reactive;
@@ -55,9 +54,7 @@ class History extends Component
     public function pushSentMessage($chatId, $messageId)
     {
         if($this->chat->id == $chatId){
-            $repository = app()->makeWith(MessageRepository::class, ['chat' => $this->chat]);
-
-            $this->messages->push($repository->find($messageId));
+            $this->messages->push($this->chat->messages()->find($messageId));
 
             $this->dispatch('MessagesListUpdated');
         }

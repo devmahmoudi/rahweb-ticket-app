@@ -2,14 +2,11 @@
 
 namespace App\Livewire\Messenger;
 
-use App\Repositories\Message\MessageRepository;
 use Livewire\Attributes\Reactive;
 use Livewire\Attributes\Validate;
 
 class Sender extends Component
 {
-    private MessageRepository $repository;
-
     #[Reactive]
     public \App\Models\Chat $chat;
 
@@ -20,9 +17,8 @@ class Sender extends Component
     {
         $this->validate();
 
-        $repository = app()->makeWith(MessageRepository::class, ['chat' => $this->chat]);
 
-        $message = $repository->create([
+        $message = $this->chat->messages()->create([
             'body' => $this->body,
             'user_id' => auth()->id()
         ]);
@@ -37,7 +33,6 @@ class Sender extends Component
 
     public function mount()
     {
-        $this->repository = app()->makeWith(MessageRepository::class, ['chat' => $this->chat]);
     }
 
     public function render()

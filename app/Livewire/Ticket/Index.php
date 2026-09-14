@@ -5,7 +5,6 @@ namespace App\Livewire\Ticket;
 use App\Enums\User\UserType;
 use App\Models\Ticket;
 use App\Models\User;
-use App\Repositories\TicketRepository;
 use App\TicketStateManagement\BulkTicketTransitionService;
 use App\TicketStateManagement\TicketState;
 use Livewire\Attributes\Url;
@@ -14,8 +13,6 @@ use Livewire\Component;
 class Index extends Component
 {
     public const CARTABLE_FILTER = 'cartable';
-
-    private TicketRepository $ticketRepository;
 
     private BulkTicketTransitionService $bulkTicketTransitionService;
 
@@ -34,26 +31,22 @@ class Index extends Component
 
     public function __construct()
     {
-        $this->ticketRepository = app()->make(TicketRepository::class);
         $this->bulkTicketTransitionService = app()->make(BulkTicketTransitionService::class);
     }
 
     public function openChat(Ticket $ticket)
     {
-        if ($ticket->user_id != auth()->id()) {
-            $this->ticketRepository->accept($ticket);
-        }
+        if ($ticket->user_id != auth()->id() && $ticket->status == TicketState::PENDING->value)
+            $ticket->stateManagement()->claim(auth()->user());
 
-        $repository = app()->make(TicketRepository::class);
-
-        $this->redirect(route('chat', $repository->findRelevantChat($ticket)));
+        $this->redirect(route('chat', $ticket->chat));
     }
 
     public function delete(Ticket $ticket)
     {
         $this->authorize('delete', $ticket);
 
-        $this->ticketRepository->delete($ticket);
+        $ticket->delete();
     }
 
     public function getListeners(): array
@@ -172,19 +165,18 @@ class Index extends Component
 
         $ticketCounts = collect(TicketState::cases())
             ->mapWithKeys(fn (TicketState $state) => [
-                $state->value => $this->ticketRepository->count(TicketState: $state->value),
+                    $state->value => Ticket::state($state)->count()
             ]);
 
         if ($selectedStatus === self::CARTABLE_FILTER) {
-            $tickets = $this->ticketRepository->cartableTickets();
-        } elseif(auth()->user()->type == UserType::CUSTOMER->value)
-            $tickets = $this->ticketRepository->getWithStatusScope($selectedStatus);
-        else
-            $tickets = $this->ticketRepository->getWithStatusScope($selectedStatus);
+            $tickets = Ticket::cartable()->paginate();
+        } else {
+            $tickets = Ticket::state(TicketState::from($selectedStatus))->paginate();
+        }
 
         return view('livewire.pages.ticket.index')
             ->with('ticketCounts', $ticketCounts)
-            ->with('cartableCount', $canViewCartable ? $this->ticketRepository->cartableTickets(false)->count() : 0)
+            ->with('cartableCount', $canViewCartable ? Ticket::cartable()->count() : 0)
             ->with('selectedStatus', $selectedStatus)
             ->with('bulkActions', $this->bulkActions())
             ->with('tickets', $tickets);

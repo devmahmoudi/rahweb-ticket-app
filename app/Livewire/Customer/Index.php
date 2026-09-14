@@ -3,7 +3,6 @@
 namespace App\Livewire\Customer;
 
 use App\Models\User;
-use App\Repositories\UserRepository;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -11,18 +10,15 @@ class Index extends Component
 {
     use WithPagination;
 
-    private UserRepository $userRepository;
-
     public function __construct()
     {
-        $this->userRepository = app()->make(UserRepository::class);
     }
 
     public function delete(User $user)
     {
         $this->authorize('delete', $user);
 
-        $this->userRepository->delete($user);
+        $user->delete();
     }
 
     public function mount()
@@ -30,9 +26,9 @@ class Index extends Component
         $this->authorize('viewAny', User::class);
     }
 
-    public function render(UserRepository $repository)
+    public function render()
     {
         return view('livewire.pages.customer.index')
-            ->with('customers', $repository->allCustomers(true));
+            ->with('customers', User::customer()->paginate());
     }
 }

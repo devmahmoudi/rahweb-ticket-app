@@ -20,7 +20,7 @@ abstract class State
     {
         $this->ticket->update(['status' => $state->value]);
 
-        $chat = $this->ticket->chat();
+        $chat = $this->ticket->chat;
         if ($chat) {
             $chat->messages()->create([
                 'body' => $message,
@@ -33,7 +33,7 @@ abstract class State
 
     protected function rejectTransition(): void
     {
-        $chat = $this->ticket->chat();
+        $chat = $this->ticket->chat;
         if ($chat) {
             DB::table('chat_user')
                 ->where('chat_id', $chat->id)

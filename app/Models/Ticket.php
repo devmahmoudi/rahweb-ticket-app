@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Events\NewTicket;
 use App\Models\Scopes\TicketUserTypeScope;
+use App\Observers\TicketObserver;
 use App\TicketStateManagement\TicketState;
 use App\TicketStateManagement\TicketStateInterface;
 use App\TicketStateManagement\States\AcceptedState;
@@ -11,13 +12,18 @@ use App\TicketStateManagement\States\DelegatedState;
 use App\TicketStateManagement\States\PendingState;
 use App\TicketStateManagement\States\RejectedState;
 use App\TicketStateManagement\States\WebserviceState;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 #[ScopedBy(TicketUserTypeScope::class)]
+#[ObservedBy(TicketObserver::class)]
 class Ticket extends Model
 {
     use HasFactory;
@@ -68,11 +74,27 @@ class Ticket extends Model
         return $this->morphMany(Message::class, 'messageable');
     }
 
-    public function chat(): Chat|null
+    public function chat(): MorphOne
     {
-        return Chat::withoutGlobalScopes()
-            ->where('meta', Ticket::class . ",{$this->id}")
-            ->first();
+        return $this->morphOne(Chat::class, 'chatable');
+    }
+
+    #[Scope]
+    protected function state(Builder $query, TicketState $state): void
+    {
+        $query->where('status', $state->value);
+    }
+
+    #[Scope]
+    protected function stateNot(Builder $query, TicketState $state): void
+    {
+        $query->where('status', "!=", $state->value);
+    }
+
+    #[Scope]
+    protected function cartable(Builder $query):mixed
+    {
+        return $query->state(TicketState::PENDING)->orWhere->stateNot(TicketState::REJECTED);
     }
 
     public function stateManagement(): TicketStateInterface

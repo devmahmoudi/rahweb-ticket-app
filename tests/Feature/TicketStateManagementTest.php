@@ -9,7 +9,7 @@ use App\Livewire\Ticket\Index;
 use App\Models\Chat;
 use App\Models\Ticket;
 use App\Models\User;
-use App\Repositories\Ticket\WebServiceRepository;
+use App\Repositories\WebService\WebServiceRepository;
 use App\TicketStateManagement\TicketState;
 use GuzzleHttp\Psr7\Response as Psr7Response;
 use Illuminate\Http\Client\Response;
