@@ -37,7 +37,7 @@ class TicketUserTypeScope implements Scope
                     $query
                         ->where(function($query){
                            $query
-                               ->where('status', TicketState::WAITING->value)
+                               ->where('status', TicketState::PENDING->value)
                                ->whereIn('workgroup_id', auth()->user()->workgroups->pluck('id')->toArray());
                         })
                         ->orWhere('recipient_id', auth()->id());

@@ -22,7 +22,7 @@
                         <td class="underline">
                             <a href="#" wire:click="open({{ $ticket }})">
                                 {{ \Illuminate\Support\Str::words($ticket->title, 3) }}
-                                @if($ticket->status == \App\TicketStateManagement\TicketState::WAITING->value)
+                                @if($ticket->status == \App\TicketStateManagement\TicketState::PENDING->value)
                                     <small class="badge text-white bg-danger p-1">جدید</small>
                                 @endif
                             </a>
@@ -34,16 +34,14 @@
                             <small>{{ \Morilog\Jalali\Jalalian::forge($ticket->created_at)->format('H:i Y/m/d') }}</small>
                         </td>
                         <td>
-                            @if($ticket->status == \App\TicketStateManagement\TicketState::WAITING->value)
+                            @if($ticket->status == \App\TicketStateManagement\TicketState::PENDING->value)
                                 <a wire:click="open({{ $ticket }})" class="btn btn-outline-primary btn-sm" href="#"><i
                                         class="bx bx-message-dots me-1"></i>پذیرش
                                     تیکت</a>
                             @else
-                                <a class="btn btn-outline-warning btn-sm" href="#"
-                                   wire:click="sendCloseTicketInquiry({{ $ticket }})"
-                                   wire:confirm="ایا از ارسال درخواست بستن تیکت مطمئن هستید ؟">
-                                    <i class="bx bx-message-dots me-1"></i>درخواست
-                                    بستن تیکت
+                                <a class="btn btn-outline-primary btn-sm" href="#"
+                                   wire:click="open({{ $ticket }})">
+                                    <i class="bx bx-message-dots me-1"></i>گفتگو
                                 </a>
                             @endif
                             @can('assign', $ticket)

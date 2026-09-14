@@ -16,9 +16,9 @@
                 <ul class="nav nav-pills" role="tablist">
                     @if(auth()->user()->type != \App\Enums\User\UserType::CUSTOMER->value)
                         <li class="nav-item">
-                            <a href="{{ route('ticket.index', ['status' => \App\TicketStateManagement\TicketState::WAITING->value]) }}"
+                            <a href="{{ route('ticket.index', ['status' => \App\TicketStateManagement\TicketState::PENDING->value]) }}"
 
-                                @class(['nav-link', 'active' => (request()->query('status') == \App\TicketStateManagement\TicketState::WAITING->value)])>در
+                                @class(['nav-link', 'active' => (request()->query('status') == \App\TicketStateManagement\TicketState::PENDING->value)])>در
                                 انتظار پاسخگو
                             </a>
                         </li>
@@ -28,13 +28,6 @@
 
                             @class(['nav-link', 'active' => (request()->query('status') == \App\TicketStateManagement\TicketState::PENDING->value)])>تیکت
                             های باز
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('ticket.index', ['status' => \App\TicketStateManagement\TicketState::CLOSED->value]) }}"
-
-                            @class(['nav-link', 'active' => (request()->query('status') == \App\TicketStateManagement\TicketState::CLOSED->value)])>بسته
-                            شده
                         </a>
                     </li>
                 </ul>

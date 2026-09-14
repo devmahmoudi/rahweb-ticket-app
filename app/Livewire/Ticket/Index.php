@@ -44,7 +44,7 @@ class Index extends Component
         $lock = cache()->lock(config('ticket.accept-cache-lock-prefix') . $ticket->id, 2)->block(2, function() use ($ticket){
             $ticket->fresh();
 
-            if($ticket->status == TicketState::WAITING->value){
+            if($ticket->status == TicketState::PENDING->value){
                 $repository = app()->make(TicketRepository::class);
 
                 $repository->accept($ticket);
@@ -57,19 +57,6 @@ class Index extends Component
         $this->authorize('delete', $ticket);
 
         $this->ticketRepository->delete($ticket);
-    }
-
-    public function closeTicket(Ticket $ticket)
-    {
-        $this->authorize('update', $ticket);
-
-        $this->ticketRepository->update($ticket,
-            [
-                'status' => TicketState::CLOSED->value,
-                'recipient_id' => null,
-            ]) ?
-            session()->now('alert-success', 'تیکت بسته شد !') :
-            session()->now('alert-danger', 'وجود خطا در سرور !');
     }
 
     #[On('ticket-assigned')]
@@ -86,9 +73,7 @@ class Index extends Component
     public function render()
     {
         if(auth()->user()->type == UserType::CUSTOMER->value)
-            $tickets = $this->status == TicketState::CLOSED->value ?
-                $this->ticketRepository->closedTickets() :
-                $this->ticketRepository->notClosedTickets();
+            $tickets = $this->ticketRepository->getWithStatusScope($this->status ?: TicketState::PENDING->value);
         else
             $tickets = $this->ticketRepository->getWithStatusScope($this->status);
 

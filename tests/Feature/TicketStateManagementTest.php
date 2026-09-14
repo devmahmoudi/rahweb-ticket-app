@@ -19,12 +19,14 @@ class TicketStateManagementTest extends TestCase
         Event::fake();
         $actor = User::factory()->operator()->create();
         $ticket = Ticket::factory()->pending()->create();
+        $chat = Chat::factory()->create(['meta' => Ticket::class . ",{$ticket->id}"]);
 
         $ticket->stateManagement()->claim($actor);
 
         $this->assertSame(TicketState::ACCEPTED->value, $ticket->fresh()->status);
         $this->assertSame($actor->id, $ticket->fresh()->recipient_id);
         Event::assertDispatched(TicketStateChanged::class);
+        $this->assertDatabaseHas('messages', ['chat_id' => $chat->id, 'body' => 'Ticket claimed.']);
     }
 
     public function test_accepted_ticket_can_be_delegated_or_rejected(): void
@@ -33,12 +35,14 @@ class TicketStateManagementTest extends TestCase
         $actor = User::factory()->operator()->create();
         $target = User::factory()->superadmin()->create();
         $ticket = Ticket::factory()->create(['status' => TicketState::ACCEPTED->value]);
+        $chat = Chat::factory()->create(['meta' => Ticket::class . ",{$ticket->id}"]);
 
         $ticket->stateManagement()->delegateTo($actor, $target);
 
         $this->assertSame(TicketState::DELEGATED->value, $ticket->fresh()->status);
         $this->assertSame($target->id, $ticket->fresh()->recipient_id);
         Event::assertDispatched(TicketStateChanged::class);
+        $this->assertDatabaseHas('messages', ['chat_id' => $chat->id, 'body' => "Ticket delegated to {$target->name}."]);
     }
 
     public function test_delegated_ticket_can_be_published(): void
@@ -46,11 +50,13 @@ class TicketStateManagementTest extends TestCase
         Event::fake();
         $actor = User::factory()->superadmin()->create();
         $ticket = Ticket::factory()->create(['status' => TicketState::DELEGATED->value]);
+        $chat = Chat::factory()->create(['meta' => Ticket::class . ",{$ticket->id}"]);
 
         $ticket->stateManagement()->publishToWebService($actor);
 
         $this->assertSame(TicketState::WEBSERVICE->value, $ticket->fresh()->status);
         Event::assertDispatched(TicketStateChanged::class);
+        $this->assertDatabaseHas('messages', ['chat_id' => $chat->id, 'body' => 'Ticket published to web service.']);
     }
 
     public function test_rejecting_an_accepted_ticket_blocks_chat_members_and_creates_alert(): void
@@ -92,8 +98,7 @@ class TicketStateManagementTest extends TestCase
         foreach ($cases as [$state, $method, $arguments]) {
             $ticket = Ticket::factory()->create(['status' => $state->value]);
 
-            $this->expectException(LogicException::class);
-            $ticket->stateManagement()->{$method}(...$arguments);
+            $this->assertThrows(fn () => $ticket->stateManagement()->{$method}(...$arguments), LogicException::class);
         }
     }
 }

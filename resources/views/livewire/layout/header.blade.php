@@ -65,8 +65,8 @@
                             <div>تیکت ها</div>
                         </a>
                     @else
-                        <a
-                                href="{{ route('ticket.index', ['status' => (\App\TicketStateManagement\TicketState::WAITING->value)]) }}"
+                            <a
+                                href="{{ route('ticket.index', ['status' => (\App\TicketStateManagement\TicketState::PENDING->value)]) }}"
                                 class="menu-link">
                             <i class='menu-icon bx bx-support'></i>
                             <div>تیکت ها</div>

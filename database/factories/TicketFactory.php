@@ -53,27 +53,4 @@ class TicketFactory extends Factory
         });
     }
 
-    /**
-     * Indicate that the ticket is closed.
-     */
-    public function closed(): Factory
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => TicketState::CLOSED->value,
-            ];
-        });
-    }
-
-    /**
-     * Indicate that the ticket is waiting for accept with user.
-     */
-    public function waiting(): Factory
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => TicketState::WAITING->value,
-            ];
-        });
-    }
 }

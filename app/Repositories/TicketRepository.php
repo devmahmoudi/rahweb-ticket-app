@@ -24,22 +24,6 @@ class TicketRepository
     }
 
     /**
-     * Returns waiting status tickets
-     *
-     * @param bool $pagination
-     * @param int|null $perpage
-     * @return Collection
-     */
-    public function waitingTickets(bool $pagination = true, ?int $perpage = 10):mixed
-    {
-        $query = Ticket::where('status', TicketState::WAITING->value);
-
-        return $pagination ?
-            $query->paginate($perpage) :
-            $query->get();
-    }
-
-    /**
      * Returns pending status tickets
      *
      * @param bool $pagination
@@ -49,38 +33,6 @@ class TicketRepository
     public function pendingTickets(bool $pagination = true, ?int $perpage = 10):mixed
     {
         $query = Ticket::where('status', TicketState::PENDING->value);
-
-        return $pagination ?
-            $query->paginate($perpage) :
-            $query->get();
-    }
-
-    /**
-     * Returns closed status tickets
-     *
-     * @param bool $pagination
-     * @param int|null $perpage
-     * @return Collection
-     */
-    public function closedTickets(bool $pagination = true, ?int $perpage = 10):mixed
-    {
-        $query = Ticket::where('status', TicketState::CLOSED->value);
-
-        return $pagination ?
-            $query->paginate($perpage) :
-            $query->get();
-    }
-
-    /**
-     * Returns tickets where their status are not equivalent to closed
-     *
-     * @param bool $pagination
-     * @param int|null $perpage
-     * @return Collection
-     */
-    public function notClosedTickets(bool $pagination = true, ?int $perpage = 10):mixed
-    {
-        $query = Ticket::where('status', '!=', TicketState::CLOSED->value);
 
         return $pagination ?
             $query->paginate($perpage) :
@@ -150,31 +102,6 @@ class TicketRepository
         DB::commit();
 
         broadcast(new TicketAccepted($ticket))->toOthers();
-
-        return true;
-    }
-
-    public function close(Ticket $ticket):bool
-    {
-        DB::beginTransaction();
-
-        if(!$chat = $this->findRelevantChat($ticket))
-            return false;
-
-        $chatRepository = app()->make(ChatRepository::class);
-
-        $chatRepository->kickMember($chat, $ticket->recipient);
-
-        $messageRepository = app()->makeWith(MessageRepository::class, ['chat' => $chat]);
-
-        if(!$messageRepository->createTicketClosedMessage($ticket))
-            return false;
-
-        $this->update($ticket, [
-            'status' => TicketState::CLOSED->value,
-        ]);
-
-        DB::commit();
 
         return true;
     }

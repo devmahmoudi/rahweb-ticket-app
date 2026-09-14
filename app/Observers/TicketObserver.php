@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Events\NewTicket;
-use App\Events\TicketAssigmentChanged;
 use App\Models\Chat;
 use App\Models\Ticket;
 use App\Repositories\Message\MessageRepository;
@@ -39,7 +38,6 @@ class TicketObserver
                     ->createTicketAssignmentMessage($ticket, $assigner);
             }
 
-            TicketAssigmentChanged::dispatch($ticket);
             NewTicket::dispatch($ticket);
         }
     }

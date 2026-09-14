@@ -133,14 +133,14 @@
 
                 impressionChartConfig.series = [
                     {{ \App\Facades\TicketRepositoryFacade::count(TicketState: \App\TicketStateManagement\TicketState::PENDING->value) }},
-                    {{ \App\Facades\TicketRepositoryFacade::count(TicketState: \App\TicketStateManagement\TicketState::WAITING->value) }},
-                    {{ \App\Facades\TicketRepositoryFacade::count(TicketState: \App\TicketStateManagement\TicketState::CLOSED->value) }},
+                    {{ \App\Facades\TicketRepositoryFacade::count(TicketState: \App\TicketStateManagement\TicketState::PENDING->value) }},
+                    {{ \App\Facades\TicketRepositoryFacade::count(TicketState: \App\TicketStateManagement\TicketState::REJECTED->value) }},
                 ]
 
                 impressionChartConfig.labels = [
                     '{{ \App\TicketStateManagement\TicketState::PENDING->value }}',
-                    '{{ \App\TicketStateManagement\TicketState::WAITING->value }}',
-                    '{{ \App\TicketStateManagement\TicketState::CLOSED->value}}'
+                    '{{ \App\TicketStateManagement\TicketState::PENDING->value }}',
+                    '{{ \App\TicketStateManagement\TicketState::REJECTED->value}}'
                 ]
 
                 if (typeof ticketImpressionEle !== undefined && ticketImpressionEle !== null) {

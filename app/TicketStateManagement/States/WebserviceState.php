@@ -43,16 +43,4 @@ class WebserviceState extends State implements TicketStateInterface
     /**
      * @inheritDoc
      */
-    public function askClose(): void
-    {
-        $this->unsupported('askClose');
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function close(): void
-    {
-        $this->unsupported('close');
-    }
 }

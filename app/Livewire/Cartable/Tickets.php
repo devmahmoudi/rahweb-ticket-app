@@ -3,7 +3,6 @@
 namespace App\Livewire\Cartable;
 
 use App\Models\Ticket;
-use App\Repositories\Message\MessageRepository;
 use App\Repositories\TicketRepository;
 use App\TicketStateManagement\TicketState;
 use Illuminate\Database\Eloquent\Collection;
@@ -21,7 +20,6 @@ class Tickets extends Component
         foreach (auth()->user()->workgroups as $workgroup){
             $listeners["echo-private:workgroup.{$workgroup->id},NewTicket"] = 'newTicket';
             $listeners["echo-private:workgroup.{$workgroup->id},TicketAccepted"] = 'removeTicket';
-            $listeners["echo-private:workgroup.{$workgroup->id},TicketClosed"] = 'removeTicket';
         }
 
         $listeners["echo-private:user." . auth()->id() . ",NewTicket"] = 'newTicket';
@@ -32,7 +30,7 @@ class Tickets extends Component
     public function newTicket($event)
     {
         $this->tickets = app()->make(TicketRepository::class)
-            ->notClosedTickets(false)
+            ->pendingTickets(false)
             ->sortByDesc('created_at');
     }
 
@@ -40,7 +38,7 @@ class Tickets extends Component
     public function refreshAfterAssignment(): void
     {
         $this->tickets = app()->make(TicketRepository::class)
-            ->notClosedTickets(false)
+            ->pendingTickets(false)
             ->sortByDesc('created_at');
     }
 
@@ -85,7 +83,7 @@ class Tickets extends Component
         $lock = cache()->lock(config('ticket.accept-cache-lock-prefix') . $ticket->id, 2)->block(2, function() use ($ticket){
             $ticket->fresh();
 
-            if($ticket->status == TicketState::WAITING->value){
+            if($ticket->status == TicketState::PENDING->value){
                 $repository = app()->make(TicketRepository::class);
 
                 $repository->accept($ticket);
@@ -93,23 +91,12 @@ class Tickets extends Component
         });
     }
 
-    public function sendCloseTicketInquiry(Ticket $ticket)
-    {
-        $ticketRepository = app()->make(TicketRepository::class);
-
-        $messageRepository = app()->makeWith(MessageRepository::class, ['chat' => $ticketRepository->findRelevantChat($ticket)]);
-
-        $messageRepository->createConfirmCloseTicketMessage($ticket);
-
-        session()->now('alert-success', 'پیام درخواست بستن تیکت ارسال شد!');
-    }
-
     public function mount(TicketRepository $ticketRepository)
     {
         $this->authorize('viewAny', Ticket::class);
 
         $this->tickets =
-            $ticketRepository->notClosedTickets(false)
+            $ticketRepository->pendingTickets(false)
                 ->sortByDesc('created_at');
 
     }

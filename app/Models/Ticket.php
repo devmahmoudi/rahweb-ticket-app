@@ -5,13 +5,13 @@ namespace App\Models;
 use App\Events\NewTicket;
 use App\Observers\TicketObserver;
 use App\Models\Scopes\TicketUserTypeScope;
+use App\TicketStateManagement\TicketState;
+use App\TicketStateManagement\TicketStateInterface;
 use App\TicketStateManagement\States\AcceptedState;
 use App\TicketStateManagement\States\DelegatedState;
 use App\TicketStateManagement\States\PendingState;
 use App\TicketStateManagement\States\RejectedState;
 use App\TicketStateManagement\States\WebserviceState;
-use App\TicketStateManagement\TicketState;
-use App\TicketStateManagement\TicketStateInterface;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -84,11 +84,11 @@ class Ticket extends Model
     public function stateManagement(): TicketStateInterface
     {
         return match (TicketState::tryFrom($this->status)) {
-            TicketState::PENDING => new PendingState($this),
-            TicketState::ACCEPTED => new AcceptedState($this),
-            TicketState::DELEGATED => new DelegatedState($this),
-            TicketState::WEBSERVICE => new WebserviceState($this),
-            TicketState::REJECTED => new RejectedState($this),
+            TicketState::PENDING => app(PendingState::class, ['ticket' => $this]),
+            TicketState::ACCEPTED => app(AcceptedState::class, ['ticket' => $this]),
+            TicketState::DELEGATED => app(DelegatedState::class, ['ticket' => $this]),
+            TicketState::WEBSERVICE => app(WebserviceState::class, ['ticket' => $this]),
+            TicketState::REJECTED => app(RejectedState::class, ['ticket' => $this]),
             default => throw new \UnexpectedValueException("Unknown ticket state: {$this->status}"),
         };
     }

@@ -28,11 +28,11 @@ class OpenTicketAgain
         if(!$ticket = $this->chatRepository->findRelevantTicket($event->message->chat_id))
             return;
 
-        if($ticket->status != TicketState::CLOSED->value)
+        if($ticket->status !== TicketState::REJECTED->value)
             return;
 
         if(!$this->ticketRepository->update($ticket, [
-            'status' => TicketState::PENDING,
+            'status' => TicketState::PENDING->value,
         ]))
             return;
 

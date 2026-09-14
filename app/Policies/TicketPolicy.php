@@ -33,7 +33,7 @@ class TicketPolicy
         if($user->isSuperadmin())
             return true;
 
-        return $user->isOperator() && ($ticket->recipient_id == $user->id || $ticket->status == TicketState::WAITING->value);
+        return $user->isOperator() && ($ticket->recipient_id == $user->id || $ticket->status == TicketState::PENDING->value);
     }
 
     /**

@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Events\NewTicket;
-use App\Events\TicketAssigmentChanged;
 use App\Livewire\Cartable\Tickets as CartableTickets;
 use App\Livewire\Ticket\Assignment;
 use App\Livewire\Ticket\Index;
@@ -73,7 +72,7 @@ class TicketAssignmentTest extends TestCase
         $this->assertTrue($superadmin->can('assign', $ticket));
         $this->assertFalse($otherOperator->can('assign', $ticket));
 
-        $ticket->update(['status' => TicketState::CLOSED->value]);
+        $ticket->update(['status' => TicketState::REJECTED->value]);
 
         $this->assertFalse($recipient->can('assign', $ticket));
         $this->assertFalse($superadmin->can('assign', $ticket));
@@ -122,9 +121,6 @@ class TicketAssignmentTest extends TestCase
 
         $ticket->update(['recipient_id' => $target->id]);
 
-        Event::assertDispatched(TicketAssigmentChanged::class, function ($event) use ($ticket, $target) {
-            return $event->ticket->is($ticket) && $event->ticket->recipient_id === $target->id;
-        });
         Event::assertDispatched(NewTicket::class, function ($event) use ($ticket, $target) {
             return $event->ticket->is($ticket) && $event->ticket->recipient_id === $target->id;
         });
@@ -162,7 +158,7 @@ class TicketAssignmentTest extends TestCase
 
     public function test_new_ticket_uses_workgroup_without_recipient_and_user_channel_with_recipient(): void
     {
-        $ticket = Ticket::factory()->waiting()->create(['recipient_id' => null]);
+        $ticket = Ticket::factory()->pending()->create(['recipient_id' => null]);
         $workgroupChannel = (new NewTicket($ticket))->broadcastOn()[0];
 
         $this->assertSame("private-workgroup.{$ticket->workgroup_id}", $workgroupChannel->name);
