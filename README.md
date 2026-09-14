@@ -68,7 +68,13 @@ Rahweb Ticket is a customer support application built with Laravel and Livewire.
 
    With Bash, use `touch database/database.sqlite`.
 
-5. Run migrations and seed the initial permissions and users:
+5. Create the public storage symlink so uploaded files can be served:
+
+   ```bash
+   php artisan storage:link
+   ```
+
+6. Run migrations and seed the initial permissions and users:
 
    ```bash
    php artisan migrate --seed
@@ -96,6 +102,7 @@ For a production frontend build, run `pnpm build`.
 - [Send Ticket to Webservice](docs/send-ticket-to-webservice.md)
 - [Static RBAC](docs/static-rbac.md)
 - [Ticket State Management](docs/ticket-state-management.md)
+- [Ticket File Attachment](docs/ticket-file-attachment.md)
 - [User Notifications](docs/user-notifications.md)
 
 ## Seeded users
@@ -116,6 +123,7 @@ These credentials are for local development only and must be changed or removed 
 - Workgroups and user assignment
 - Real-time chat and messaging
 - Tickets
+- Ticket file attachments
 - Media uploads
 
 ## Useful commands
