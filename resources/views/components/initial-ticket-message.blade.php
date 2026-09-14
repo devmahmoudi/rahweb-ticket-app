@@ -9,4 +9,13 @@
     <div>
         {{ $ticket->description }}
     </div>
+
+    @if($ticket->attachment_path)
+        <div class="mt-3">
+            <strong>پیوست:</strong>
+            <a href="{{ Storage::url($ticket->attachment_path) }}" target="_blank" rel="noopener noreferrer">
+                دانلود فایل
+            </a>
+        </div>
+    @endif
 </div>
