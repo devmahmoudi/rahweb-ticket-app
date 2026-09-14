@@ -12,15 +12,6 @@ use Illuminate\Support\Facades\DB;
 
 class TicketRepository
 {
-    public function getWithStatusScope(string $status, bool $pagination = true, ?int $perpage = 10):mixed
-    {
-        $query = Ticket::where('status', $status);
-
-        return $pagination ?
-            $query->paginate($perpage) :
-            $query->get();
-    }
-
     /**
      * Create new ticket with relevant chat and its initial message
      *

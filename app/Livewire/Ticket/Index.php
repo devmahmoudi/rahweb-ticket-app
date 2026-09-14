@@ -177,10 +177,9 @@ class Index extends Component
 
         if ($selectedStatus === self::CARTABLE_FILTER) {
             $tickets = Ticket::cartable()->paginate();
-        } elseif(auth()->user()->type == UserType::CUSTOMER->value)
-            $tickets = $this->ticketRepository->getWithStatusScope($selectedStatus);
-        else
-            $tickets = $this->ticketRepository->getWithStatusScope($selectedStatus);
+        } else {
+            $tickets = Ticket::state(TicketState::from($selectedStatus))->paginate();
+        }
 
         return view('livewire.pages.ticket.index')
             ->with('ticketCounts', $ticketCounts)
