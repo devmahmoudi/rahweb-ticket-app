@@ -65,18 +65,6 @@
                     </a>
                 </li>
             @endcan
-
-            <!-- Cartable -->
-            @if(\Illuminate\Support\Facades\Gate::allows('cartable'))
-                <li @class(['menu-item', 'active' => (\Illuminate\Support\Str::startsWith(request()->getRequestUri(), '/cartable'))])>
-                    <a
-                            href="{{ route('ticket.index', ['status' => \App\Livewire\Ticket\Index::CARTABLE_FILTER]) }}"
-                            class="menu-link">
-                        <i class='menu-icon bx bx-briefcase'></i>
-                        <div>کارتابل</div>
-                    </a>
-                </li>
-            @endcan
         </ul>
     </div>
 </aside>

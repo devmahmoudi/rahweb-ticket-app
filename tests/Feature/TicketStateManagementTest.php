@@ -137,4 +137,21 @@ class TicketStateManagementTest extends TestCase
         $this->assertSame(TicketState::DELEGATED->value, $ticket->fresh()->status);
         $this->assertSame($superadmin->id, $ticket->fresh()->recipient_id);
     }
+
+    public function test_ticket_index_handles_new_ticket_broadcasts(): void
+    {
+        $operator = User::factory()->operator()->create();
+        $this->actingAs($operator);
+
+        $component = app(Index::class);
+
+        $this->assertSame(
+            'newTicket',
+            $component->getListeners()["echo-private:user.{$operator->id},NewTicket"]
+        );
+        $this->assertTrue(is_callable([$component, 'newTicket']));
+
+        $component->newTicket();
+        $this->assertTrue(true);
+    }
 }

@@ -57,6 +57,11 @@ class Index extends Component
         return $listeners;
     }
 
+    public function newTicket($event = null): void
+    {
+        // The event triggers a Livewire rerender using the current filter.
+    }
+
     public function transition(Ticket $ticket, string $action, ?int $targetId = null): void
     {
         $this->authorize('update', $ticket);
