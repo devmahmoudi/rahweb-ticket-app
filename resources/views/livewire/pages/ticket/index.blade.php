@@ -13,7 +13,7 @@
         <x-alert/>
         <div class="card text-center">
             <div class="card-header border-bottom">
-                <ul class="nav nav-pills" role="tablist">
+                <ul class="nav nav-pills d-none d-md-flex" role="tablist">
                     @foreach(\App\TicketStateManagement\TicketState::cases() as $state)
                         <li class="nav-item">
                             <a href="{{ route('ticket.index', ['status' => $state->value]) }}"
@@ -35,10 +35,43 @@
                                         رد شده
                                         @break
                                 @endswitch
+                                @if(($ticketCounts[$state->value] ?? 0) > 0)
+                                    <span class="badge bg-secondary ms-1">{{ $ticketCounts[$state->value] }}</span>
+                                @endif
                             </a>
                         </li>
                     @endforeach
                 </ul>
+                <form class="d-md-none p-3" method="GET" action="{{ route('ticket.index') }}">
+                    <label class="visually-hidden" for="ticket-status">وضعیت تیکت</label>
+                    <select id="ticket-status" name="status" class="form-select" onchange="this.form.submit()">
+                        @foreach(\App\TicketStateManagement\TicketState::cases() as $state)
+                            <option value="{{ $state->value }}"
+                                @selected(($status ?: \App\TicketStateManagement\TicketState::PENDING->value) === $state->value)>
+                                @switch($state)
+                                    @case(\App\TicketStateManagement\TicketState::PENDING)
+                                        در انتظار رسیدگی
+                                        @break
+                                    @case(\App\TicketStateManagement\TicketState::ACCEPTED)
+                                        در حال رسیدگی
+                                        @break
+                                    @case(\App\TicketStateManagement\TicketState::DELEGATED)
+                                        ارجاع شده
+                                        @break
+                                    @case(\App\TicketStateManagement\TicketState::WEBSERVICE)
+                                        ارسال شده به وب سرویس
+                                        @break
+                                    @case(\App\TicketStateManagement\TicketState::REJECTED)
+                                        رد شده
+                                        @break
+                                @endswitch
+                                @if(($ticketCounts[$state->value] ?? 0) > 0)
+                                    ({{ $ticketCounts[$state->value] }})
+                                @endif
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
             </div>
             <div class="tab-content">
                 <div class="table-responsive text-nowrap overflow-visible">

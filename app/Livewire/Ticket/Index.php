@@ -53,12 +53,18 @@ class Index extends Component
 
     public function render()
     {
+        $ticketCounts = collect(TicketState::cases())
+            ->mapWithKeys(fn (TicketState $state) => [
+                $state->value => $this->ticketRepository->count(TicketState: $state->value),
+            ]);
+
         if(auth()->user()->type == UserType::CUSTOMER->value)
             $tickets = $this->ticketRepository->getWithStatusScope($this->status ?: TicketState::PENDING->value);
         else
             $tickets = $this->ticketRepository->getWithStatusScope($this->status ?: TicketState::PENDING->value);
 
         return view('livewire.pages.ticket.index')
+            ->with('ticketCounts', $ticketCounts)
             ->with('tickets', $tickets);
     }
 }
