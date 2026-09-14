@@ -83,6 +83,18 @@ class Ticket extends Model
         $query->where('status', $state->value);
     }
 
+    #[Scope]
+    protected function stateNot(Builder $query, TicketState $state): void
+    {
+        $query->where('status', "!=", $state->value);
+    }
+
+    #[Scope]
+    protected function cartable(Builder $query):mixed
+    {
+        return $query->state(TicketState::PENDING)->orWhere->stateNot(TicketState::REJECTED);
+    }
+
     public function stateManagement(): TicketStateInterface
     {
         return match (TicketState::tryFrom($this->status)) {

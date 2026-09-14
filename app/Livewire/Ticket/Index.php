@@ -176,7 +176,7 @@ class Index extends Component
             ]);
 
         if ($selectedStatus === self::CARTABLE_FILTER) {
-            $tickets = $this->ticketRepository->cartableTickets();
+            $tickets = Ticket::cartable()->paginate();
         } elseif(auth()->user()->type == UserType::CUSTOMER->value)
             $tickets = $this->ticketRepository->getWithStatusScope($selectedStatus);
         else
@@ -184,7 +184,7 @@ class Index extends Component
 
         return view('livewire.pages.ticket.index')
             ->with('ticketCounts', $ticketCounts)
-            ->with('cartableCount', $canViewCartable ? $this->ticketRepository->cartableTickets(false)->count() : 0)
+            ->with('cartableCount', $canViewCartable ? Ticket::cartable()->count() : 0)
             ->with('selectedStatus', $selectedStatus)
             ->with('bulkActions', $this->bulkActions())
             ->with('tickets', $tickets);

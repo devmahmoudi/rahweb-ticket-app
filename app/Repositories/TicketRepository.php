@@ -12,18 +12,6 @@ use Illuminate\Support\Facades\DB;
 
 class TicketRepository
 {
-    
-    public function cartableTickets(bool $pagination = true, ?int $perpage = 10):mixed
-    {
-        $query = Ticket::where(function ($query){
-            $query->where('status', TicketState::PENDING->value)->orWhere('recipient_id', auth()->id());
-        })->whereNot('status', TicketState::REJECTED->value);
-
-        return $pagination ?
-            $query->paginate($perpage) :
-            $query->get();
-    }
-
     public function getWithStatusScope(string $status, bool $pagination = true, ?int $perpage = 10):mixed
     {
         $query = Ticket::where('status', $status);
