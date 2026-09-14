@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Enums\User\UserType;
-use App\Models\Customer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -52,7 +51,6 @@ class UserFactory extends Factory
     {
         return $this->state(fn(array $attributes) => [
             'type' => UserType::CUSTOMER->value,
-            'customer_id' => Customer::factory(),
         ]);
     }
 

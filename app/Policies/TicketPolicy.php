@@ -76,7 +76,7 @@ class TicketPolicy
     public function delete(User $user, Ticket $ticket): bool
     {
         if($user->isCustomer())
-            return $user->customer and $ticket->customer_id == $user->customer->id;
+            return $ticket->user_id == $user->id;
 
         if($user->isSuperadmin())
             return true;
