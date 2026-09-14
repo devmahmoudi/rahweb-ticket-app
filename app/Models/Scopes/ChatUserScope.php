@@ -16,7 +16,7 @@ class ChatUserScope implements Scope
     {
         $user = auth()->user();
 
-        if(!$user){
+        if(!$user || $user->type === UserType::SUPERADMIN){
             return;
         }
 

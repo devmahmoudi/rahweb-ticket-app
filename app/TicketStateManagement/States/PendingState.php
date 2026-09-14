@@ -24,9 +24,7 @@ class PendingState extends State implements TicketStateInterface
             DB::transaction(function () use ($ticketToClaim, $actor): void {
                 $this->ticket->update(['recipient_id' => $actor->id]);
 
-                $ticketRepository = app()->make(TicketRepository::class);
-
-                if (!$chat = $ticketRepository->findRelevantChat($ticketToClaim)) {
+                if (!$chat = $this->ticket->chat()->withoutGlobalScopes()->first()) {
                     throw new \Error("Chat for ticket $ticketToClaim->id not found");
                 }
 

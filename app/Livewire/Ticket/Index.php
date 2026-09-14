@@ -40,13 +40,10 @@ class Index extends Component
 
     public function openChat(Ticket $ticket)
     {
-        if ($ticket->user_id != auth()->id()) {
+        if ($ticket->user_id != auth()->id() && $ticket->status == TicketState::PENDING)
             $ticket->stateManagement()->claim(auth()->user());
-        }
 
-        $repository = app()->make(TicketRepository::class);
-
-        $this->redirect(route('chat', $repository->findRelevantChat($ticket)));
+        $this->redirect(route('chat', $ticket->chat));
     }
 
     public function delete(Ticket $ticket)
