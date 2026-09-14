@@ -39,8 +39,9 @@ class TicketRepository
 
     public function cartableTickets(bool $pagination = true, ?int $perpage = 10):mixed
     {
-        $query = Ticket::where('status', TicketState::PENDING->value)->orWhere('recipient_id', auth()->id());
-
+        $query = Ticket::where(function ($query){
+            $query->where('status', TicketState::PENDING->value)->orWhere('recipient_id', auth()->id());
+        })->whereNot('status', TicketState::REJECTED->value);
 
         return $pagination ?
             $query->paginate($perpage) :

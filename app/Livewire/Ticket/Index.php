@@ -6,6 +6,7 @@ use App\Enums\User\UserType;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Repositories\TicketRepository;
+use App\TicketStateManagement\BulkTicketTransitionService;
 use App\TicketStateManagement\TicketState;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -15,6 +16,8 @@ class Index extends Component
     public const CARTABLE_FILTER = 'cartable';
 
     private TicketRepository $ticketRepository;
+
+    private BulkTicketTransitionService $bulkTicketTransitionService;
 
     #[Url]
     public string $status = '';
@@ -32,6 +35,7 @@ class Index extends Component
     public function __construct()
     {
         $this->ticketRepository = app()->make(TicketRepository::class);
+        $this->bulkTicketTransitionService = app()->make(BulkTicketTransitionService::class);
     }
 
     public function openChat(Ticket $ticket)
@@ -116,31 +120,12 @@ class Index extends Component
     {
         $this->authorizeBulkTransition($action);
 
-        $tickets = Ticket::query()->whereIn('id', $this->selectedTicketIds)->get();
-        if ($tickets->count() !== count($this->selectedTicketIds)) {
-            abort(403);
-        }
-
-        $actor = auth()->user();
-        $target = null;
-        if ($action === 'delegate') {
-            $target = User::query()
-                ->whereKey($targetId)
-                ->where('type', UserType::SUPERADMIN->value)
-                ->firstOrFail();
-        }
-
-        foreach ($tickets as $ticket) {
-            $this->authorize('update', $ticket);
-
-            match ($action) {
-                'claim' => $ticket->stateManagement()->claim($actor),
-                'delegate' => $ticket->stateManagement()->delegateTo($actor, $target),
-                'publish' => $ticket->stateManagement()->publishToWebService($actor),
-                'reject' => $ticket->stateManagement()->reject(),
-                default => abort(422, 'Unknown ticket transition.'),
-            };
-        }
+        $this->bulkTicketTransitionService->applyBulkTransition(
+            auth()->user(),
+            $this->selectedTicketIds,
+            $action,
+            $targetId,
+        );
 
         $this->selectedTicketIds = [];
         $this->bulkMode = false;
@@ -154,35 +139,20 @@ class Index extends Component
 
     private function authorizeBulkTransition(string $action): void
     {
-        abort_unless(auth()->user()->isOperator() || auth()->user()->isSuperadmin(), 403);
-
-        $availableActions = $this->bulkActions();
-        abort_unless(in_array($action, $availableActions, true), 422);
+        $this->bulkTicketTransitionService->authorizeBulkTransition(
+            auth()->user(),
+            $this->bulkMode,
+            $this->selectedTicketIds,
+            $action,
+        );
     }
 
     private function bulkActions(): array
     {
-        if (!$this->bulkMode || $this->selectedTicketIds === []) {
-            return [];
-        }
-
-        $actionMap = [
-            TicketState::PENDING->value => ['claim'],
-            TicketState::ACCEPTED->value => ['delegate', 'reject'],
-            TicketState::DELEGATED->value => ['publish', 'reject'],
-            TicketState::WEBSERVICE->value => [],
-            TicketState::REJECTED->value => [],
-        ];
-
-        $tickets = Ticket::query()->whereIn('id', $this->selectedTicketIds)->get();
-        $actions = null;
-        foreach ($tickets as $ticket) {
-            $actions = $actions === null
-                ? $actionMap[$ticket->status] ?? []
-                : array_values(array_intersect($actions, $actionMap[$ticket->status] ?? []));
-        }
-
-        return $actions ?? [];
+        return $this->bulkTicketTransitionService->bulkActions(
+            $this->bulkMode,
+            $this->selectedTicketIds,
+        );
     }
 
     public function mount()
