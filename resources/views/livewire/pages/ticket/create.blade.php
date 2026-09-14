@@ -38,6 +38,13 @@
                 @enderror
             </div>
             <div class="form-group p-3">
+                <label for="attachment" class="form-label">پیوست (اختیاری)</label>
+                <input type="file" wire:model="attachment" id="attachment" class="form-control" accept="application/pdf,image/*">
+                @error('attachment')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+            <div class="form-group p-3">
                 <button class="btn btn-success" type="submit">ذخیره</button>
                 <a class="btn btn-warning" href="{{ route('ticket.index') }}" >بازگشت</a>
             </div>
