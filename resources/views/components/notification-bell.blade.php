@@ -24,7 +24,7 @@
 
                     <form method="POST" action="{{ route('notifications.read', $notification->id) }}">
                         @csrf
-                        <button type="submit" class="btn btn-sm btn-outline-primary">علامت‌گذاری به‌عنوان خوانده شده</button>
+                        <button type="submit" class="btn btn-sm btn-outline-primary">خوانده شد</button>
                     </form>
                 </div>
             </li>
