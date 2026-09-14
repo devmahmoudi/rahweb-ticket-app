@@ -52,25 +52,13 @@ class TicketPolicy
      */
     public function update(User $user, Ticket $ticket): bool
     {
-        if($user->isCustomer())
-            return $ticket->user_id == $user->id;
+        // if($user->isCustomer())
+        //     return $ticket->user_id == $user->id;
 
         if($user->isSuperadmin())
             return true;
 
         return $user->isOperator() && $ticket->recipient_id == $user->id;
-    }
-
-    /**
-     * Determine whether the user can assign the ticket to another user.
-     */
-    public function assign(User $user, Ticket $ticket): bool
-    {
-        if ($ticket->status !== TicketState::PENDING->value) {
-            return false;
-        }
-
-        return $user->isSuperadmin() || $ticket->recipient_id === $user->id;
     }
 
     /**

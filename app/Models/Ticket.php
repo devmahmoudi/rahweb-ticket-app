@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Events\NewTicket;
-use App\Observers\TicketObserver;
 use App\Models\Scopes\TicketUserTypeScope;
 use App\TicketStateManagement\TicketState;
 use App\TicketStateManagement\TicketStateInterface;
@@ -28,11 +27,6 @@ class Ticket extends Model
     protected $dispatchesEvents = [
         'created' => NewTicket::class
     ];
-
-    protected static function booted(): void
-    {
-        static::observe(TicketObserver::class);
-    }
 
     /**
      * Specify the workgroup to which the ticket was sent

@@ -4,9 +4,9 @@ namespace App\Livewire\Ticket;
 
 use App\Enums\User\UserType;
 use App\Models\Ticket;
+use App\Models\User;
 use App\Repositories\TicketRepository;
 use App\TicketStateManagement\TicketState;
-use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
@@ -18,6 +18,8 @@ class Index extends Component
 
     #[Url]
     public string $status = '';
+
+    public ?int $delegateTargetId = null;
 
     public function __construct()
     {
@@ -55,9 +57,27 @@ class Index extends Component
         return $listeners;
     }
 
-    #[On('ticket-assigned')]
-    public function refreshAfterAssignment(): void
+    public function transition(Ticket $ticket, string $action, ?int $targetId = null): void
     {
+        $this->authorize('update', $ticket);
+
+        $actor = auth()->user();
+
+        match ($action) {
+            'claim' => $ticket->stateManagement()->claim($actor),
+            'delegate' => $ticket->stateManagement()->delegateTo(
+                $actor,
+                User::query()->whereKey($targetId)->where('type', UserType::SUPERADMIN->value)->firstOrFail(),
+            ),
+            'publish' => $ticket->stateManagement()->publishToWebService($actor),
+            'reject' => $ticket->stateManagement()->reject(),
+            default => abort(422, 'Unknown ticket transition.'),
+        };
+    }
+
+    public function delegate(Ticket $ticket): void
+    {
+        $this->transition($ticket, 'delegate', $this->delegateTargetId);
     }
 
     public function mount()

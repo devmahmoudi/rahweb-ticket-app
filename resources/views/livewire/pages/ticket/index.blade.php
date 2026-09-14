@@ -117,11 +117,48 @@
                                     @can('view', $ticket)
                                         <button class="btn btn-outline-primary btn-sm">گفتگو</button>
                                     @endcan
-                                    @can('assign', $ticket)
-                                        <button class="btn btn-outline-warning btn-sm"
-                                                wire:click="$dispatch('open-ticket-assignment', { ticketId: {{ $ticket->id }} })">
-                                            واگذاری
-                                        </button>
+                                    @can('update', $ticket)
+                                        @switch($ticket->status)
+                                            @case(\App\TicketStateManagement\TicketState::PENDING->value)
+                                                <button class="btn btn-outline-primary btn-sm"
+                                                        wire:click="transition({{ $ticket->id }}, 'claim')"
+                                                        wire:confirm="از پذیرش این تیکت مطمئن هستید؟">
+                                                    پذیرش
+                                                </button>
+                                                @break
+                                            @case(\App\TicketStateManagement\TicketState::ACCEPTED->value)
+                                                    <select wire:model="delegateTargetId" class="form-select form-select-sm d-inline-block w-auto">
+                                                        <option value="">انتخاب مدیر</option>
+                                                        @foreach(\App\Models\User::query()->where('type', \App\Enums\User\UserType::SUPERADMIN->value)->where('id', '!=', auth()->id())->get() as $admin)
+                                                            <option value="{{ $admin->id }}">{{ $admin->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    <button class="btn btn-outline-warning btn-sm"
+                                                            wire:click="delegate({{ $ticket->id }})"
+                                                            wire:confirm="از ارجاع این تیکت مطمئن هستید؟">
+                                                        ارجاع
+                                                    </button>
+                                                <button class="btn btn-outline-danger btn-sm"
+                                                        wire:click="transition({{ $ticket->id }}, 'reject')"
+                                                        wire:confirm="از رد این تیکت مطمئن هستید؟">
+                                                    رد
+                                                </button>
+                                                @break
+                                            @case(\App\TicketStateManagement\TicketState::DELEGATED->value)
+                                                @if(auth()->user()->isSuperadmin())
+                                                    <button class="btn btn-outline-info btn-sm"
+                                                            wire:click="transition({{ $ticket->id }}, 'publish')"
+                                                            wire:confirm="از ارسال تیکت به وب سرویس مطمئن هستید؟">
+                                                        ارسال به وب سرویس
+                                                    </button>
+                                                    <button class="btn btn-outline-danger btn-sm"
+                                                            wire:click="transition({{ $ticket->id }}, 'reject')"
+                                                            wire:confirm="از رد این تیکت مطمئن هستید؟">
+                                                        رد
+                                                    </button>
+                                                @endif
+                                                @break
+                                        @endswitch
                                     @endcan
                                 </td>
                             </tr>
@@ -135,6 +172,5 @@
     </div>
     {{ $tickets->links('vendor.livewire.bootstrap') }}
 
-    <livewire:ticket.assignment/>
 </div>
 

@@ -4,11 +4,13 @@ namespace Tests\Feature;
 
 use App\Enums\Chat\ChatUserConnectionStatus;
 use App\Events\TicketStateChanged;
+use App\Livewire\Ticket\Index;
 use App\Models\Chat;
 use App\Models\Ticket;
 use App\Models\User;
 use App\TicketStateManagement\TicketState;
 use Illuminate\Support\Facades\Event;
+use Livewire\Livewire;
 use LogicException;
 use Tests\TestCase;
 
@@ -100,5 +102,39 @@ class TicketStateManagementTest extends TestCase
 
             $this->assertThrows(fn () => $ticket->stateManagement()->{$method}(...$arguments), LogicException::class);
         }
+    }
+
+    public function test_ticket_index_displays_only_the_current_state_transitions_with_confirmation(): void
+    {
+        $operator = User::factory()->operator()->create();
+        $ticket = Ticket::factory()->pending()->operator($operator)->create();
+
+        $this->actingAs($operator);
+
+        Livewire::test(Index::class)
+            ->set('status', TicketState::PENDING->value)
+            ->assertSee('پذیرش')
+            ->assertSee('wire:confirm')
+            ->assertDontSee('ارسال به وب سرویس');
+    }
+
+    public function test_ticket_index_can_delegate_an_accepted_ticket_to_a_superadmin(): void
+    {
+        $operator = User::factory()->operator()->create();
+        $superadmin = User::factory()->superadmin()->create();
+        $ticket = Ticket::factory()->create([
+            'status' => TicketState::ACCEPTED->value,
+            'recipient_id' => $operator->id,
+        ]);
+
+        $this->actingAs($operator);
+
+        Livewire::test(Index::class)
+            ->set('status', TicketState::ACCEPTED->value)
+            ->set('delegateTargetId', $superadmin->id)
+            ->call('delegate', $ticket->id);
+
+        $this->assertSame(TicketState::DELEGATED->value, $ticket->fresh()->status);
+        $this->assertSame($superadmin->id, $ticket->fresh()->recipient_id);
     }
 }

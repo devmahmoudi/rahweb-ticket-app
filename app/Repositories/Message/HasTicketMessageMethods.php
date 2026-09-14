@@ -5,7 +5,6 @@ namespace App\Repositories\Message;
 use App\Models\Chat;
 use App\Models\Message;
 use App\Models\Ticket;
-use App\Models\User;
 use App\View\Components\InitialTicketMessage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -24,11 +23,4 @@ trait HasTicketMessageMethods
         return $this->create($messageData);
     }
 
-    public function createTicketAssignmentMessage(Ticket $ticket, User $assigner):Message|false
-    {
-        return $this->create([
-            'body' => "{$assigner->name} تیکت شما را به  {$ticket->recipient->name} ارجاع کرد",
-            'user_id' => $assigner->id,
-        ]);
-    }
 }
