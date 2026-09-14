@@ -7,6 +7,7 @@ use App\Notifications\SendTicketToWebserviceJobSucceed;
 use App\Repositories\Ticket\WebServiceRepository;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Notification;
 use RuntimeException;
 
 class SendTicketToWebservice implements ShouldQueue
@@ -20,7 +21,7 @@ class SendTicketToWebservice implements ShouldQueue
         public Ticket $ticket
     )
     {
-        //
+        $this->queue = 'webservice';
     }
 
     /**
@@ -37,6 +38,10 @@ class SendTicketToWebservice implements ShouldQueue
             ));
         }
 
-        $this->ticket->owner?->notify(new SendTicketToWebserviceJobSucceed());
+        $owner = $this->ticket->owner()->first();
+
+        if ($owner) {
+            Notification::send($owner, new SendTicketToWebserviceJobSucceed());
+        }
     }
 }

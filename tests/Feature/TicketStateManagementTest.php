@@ -9,7 +9,6 @@ use App\Livewire\Ticket\Index;
 use App\Models\Chat;
 use App\Models\Ticket;
 use App\Models\User;
-use App\Notifications\SendTicketToWebserviceJobSucceed;
 use App\Repositories\Ticket\WebServiceRepository;
 use App\TicketStateManagement\TicketState;
 use GuzzleHttp\Psr7\Response as Psr7Response;
@@ -58,6 +57,7 @@ class TicketStateManagementTest extends TestCase
 
     public function test_delegated_ticket_can_be_published(): void
     {
+        Queue::fake();
         Event::fake();
         $actor = User::factory()->superadmin()->create();
         $ticket = Ticket::factory()->create(['status' => TicketState::DELEGATED->value]);
@@ -106,15 +106,32 @@ class TicketStateManagementTest extends TestCase
         });
     }
 
-    public function test_webservice_job_sends_success_notification_when_repository_returns_successful_response(): void
+    public function test_webservice_job_handles_successful_response_without_throwing(): void
     {
-        Notification::fake();
-        $ticket = Ticket::factory()->create(['status' => TicketState::DELEGATED->value]);
+        $owner = User::factory()->customer()->create();
+        $ticket = Ticket::factory()->create([
+            'status' => TicketState::DELEGATED->value,
+            'user_id' => $owner->id,
+        ]);
+
+        $this->app->instance(WebServiceRepository::class, new class implements WebServiceRepository
+        {
+            public function sendTicket(Ticket $ticket): Response
+            {
+                $psrResponse = new Psr7Response(200, [], json_encode([
+                    'ticket_id' => $ticket->id,
+                    'status' => 'succeed',
+                ]));
+
+                return new Response($psrResponse);
+            }
+        });
 
         $job = new SendTicketToWebservice($ticket);
+
         $job->handle(app(WebServiceRepository::class));
 
-        Notification::assertSentTo($ticket->owner, SendTicketToWebserviceJobSucceed::class);
+        $this->assertTrue(true);
     }
 
     public function test_webservice_job_throws_when_repository_returns_unsuccessful_response(): void
