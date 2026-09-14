@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Ticket;
 
+use App\Models\Ticket;
 use App\Models\Workgroup;
 use App\Repositories\TicketRepository;
 use App\Repositories\WorkgroupRepository;
@@ -56,7 +57,7 @@ class Create extends Component
             $ticketData['attachment_path'] = $attachmentPath;
         }
 
-        $this->ticketRepository->create($ticketData) ?
+        Ticket::create($ticketData) ?
             session()->flash('alert-success', 'تیکت جدید با موفقیت ثبت شد !') :
             session()->flash('alert-danger', 'وجود خطا در سرور ! لطفا زمان دیگری امتحان کنید.');
 

@@ -13,30 +13,6 @@ use Illuminate\Support\Facades\DB;
 class TicketRepository
 {
     /**
-     * Create new ticket with relevant chat and its initial message
-     *
-     * @param array $data
-     * @return Ticket|false
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     */
-    public function create(array $data):Ticket|false
-    {
-        DB::beginTransaction();
-
-        if(!$ticket = Ticket::create($data))
-            return false;
-
-        $chatRepository = app()->make(ChatRepository::class);
-
-        if(!$chat = $chatRepository->createForTicket($ticket))
-            return false;
-
-        DB::commit();
-
-        return $ticket;
-    }
-
-    /**
      * Accept ticket for handling and answer to customer often it does with operator
      *
      * @param Ticket $ticket

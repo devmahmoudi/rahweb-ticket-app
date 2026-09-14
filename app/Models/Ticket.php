@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Events\NewTicket;
 use App\Models\Scopes\TicketUserTypeScope;
+use App\Observers\TicketObserver;
 use App\TicketStateManagement\TicketState;
 use App\TicketStateManagement\TicketStateInterface;
 use App\TicketStateManagement\States\AcceptedState;
@@ -11,6 +12,7 @@ use App\TicketStateManagement\States\DelegatedState;
 use App\TicketStateManagement\States\PendingState;
 use App\TicketStateManagement\States\RejectedState;
 use App\TicketStateManagement\States\WebserviceState;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 #[ScopedBy(TicketUserTypeScope::class)]
+#[ObservedBy(TicketObserver::class)]
 class Ticket extends Model
 {
     use HasFactory;
