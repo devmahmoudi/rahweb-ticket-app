@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use App\Models\Chat;
-use App\Models\Scopes\TicketUserTypeScope;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Repositories\Chat\ChatRepository;
@@ -51,8 +50,6 @@ class TicketRepository
     public function getWithStatusScope(string $status, bool $pagination = true, ?int $perpage = 10):mixed
     {
         $query = Ticket::where('status', $status);
-
-        dd($query->withoutGlobalScope(TicketUserTypeScope::class)->get());
 
         return $pagination ?
             $query->paginate($perpage) :

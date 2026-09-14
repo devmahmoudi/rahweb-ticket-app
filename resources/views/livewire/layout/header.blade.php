@@ -57,21 +57,12 @@
             <!-- Ticket -->
             @can('viewAny', \App\Models\Ticket::class)
                 <li @class(['menu-item', 'active' => (\Illuminate\Support\Str::startsWith(request()->getRequestUri(), '/ticket'))])>
-                    @if(auth()->user()->type == \App\Enums\User\UserType::CUSTOMER)
-                        <a
-                                href="{{ route('ticket.index', ['status' => (\App\TicketStateManagement\TicketState::PENDING->value)]) }}"
-                                class="menu-link">
-                            <i class='menu-icon bx bx-support'></i>
-                            <div>تیکت ها</div>
-                        </a>
-                    @else
-                            <a
-                                href="{{ route('ticket.index', ['status' => (\App\TicketStateManagement\TicketState::PENDING->value)]) }}"
-                                class="menu-link">
-                            <i class='menu-icon bx bx-support'></i>
-                            <div>تیکت ها</div>
-                        </a>
-                    @endif
+                    <a
+                            href="{{ route('ticket.index', ['status' => (\App\TicketStateManagement\TicketState::PENDING->value)]) }}"
+                            class="menu-link">
+                        <i class='menu-icon bx bx-support'></i>
+                        <div>تیکت ها</div>
+                    </a>
                 </li>
             @endcan
 

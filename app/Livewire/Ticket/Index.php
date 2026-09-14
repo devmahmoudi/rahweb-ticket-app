@@ -56,7 +56,7 @@ class Index extends Component
         if(auth()->user()->type == UserType::CUSTOMER->value)
             $tickets = $this->ticketRepository->getWithStatusScope($this->status ?: TicketState::PENDING->value);
         else
-            $tickets = $this->ticketRepository->getWithStatusScope($this->status);
+            $tickets = $this->ticketRepository->getWithStatusScope($this->status ?: TicketState::PENDING->value);
 
         return view('livewire.pages.ticket.index')
             ->with('tickets', $tickets);
