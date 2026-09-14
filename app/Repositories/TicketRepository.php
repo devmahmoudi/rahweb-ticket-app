@@ -12,23 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class TicketRepository
 {
-
-    /**
-     * Returns pending status tickets
-     *
-     * @param bool $pagination
-     * @param int|null $perpage
-     * @return Collection
-     */
-    public function pendingTickets(bool $pagination = true, ?int $perpage = 10):mixed
-    {
-        $query = Ticket::where('status', TicketState::PENDING->value);
-
-        return $pagination ?
-            $query->paginate($perpage) :
-            $query->get();
-    }
-
+    
     public function cartableTickets(bool $pagination = true, ?int $perpage = 10):mixed
     {
         $query = Ticket::where(function ($query){
