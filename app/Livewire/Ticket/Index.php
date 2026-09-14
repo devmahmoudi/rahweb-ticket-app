@@ -172,7 +172,7 @@ class Index extends Component
 
         $ticketCounts = collect(TicketState::cases())
             ->mapWithKeys(fn (TicketState $state) => [
-                $state->value => $this->ticketRepository->count(TicketState: $state->value),
+                    $state->value => Ticket::state($state)->count()
             ]);
 
         if ($selectedStatus === self::CARTABLE_FILTER) {

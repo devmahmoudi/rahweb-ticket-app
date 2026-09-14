@@ -12,14 +12,6 @@ use Illuminate\Support\Facades\DB;
 
 class TicketRepository
 {
-    public function count(array $where = [], ?string $TicketState = null): int
-    {
-        return
-            Ticket::where($where)
-            ->when($TicketState, function ($query) use ($TicketState){
-                $query->where('status', $TicketState);
-            })->count();
-    }
 
     /**
      * Returns pending status tickets

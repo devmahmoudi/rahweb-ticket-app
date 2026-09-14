@@ -11,7 +11,9 @@ use App\TicketStateManagement\States\DelegatedState;
 use App\TicketStateManagement\States\PendingState;
 use App\TicketStateManagement\States\RejectedState;
 use App\TicketStateManagement\States\WebserviceState;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -73,6 +75,12 @@ class Ticket extends Model
         return Chat::withoutGlobalScopes()
             ->where('meta', Ticket::class . ",{$this->id}")
             ->first();
+    }
+
+    #[Scope]
+    protected function state(Builder $query, TicketState $state): void
+    {
+        $query->where('status', $state->value);
     }
 
     public function stateManagement(): TicketStateInterface
