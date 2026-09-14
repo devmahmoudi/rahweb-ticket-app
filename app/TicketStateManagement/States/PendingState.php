@@ -3,14 +3,12 @@
 namespace App\TicketStateManagement\States;
 
 use App\Models\User;
-use App\Repositories\Chat\ChatRepository;
 use App\Repositories\TicketRepository;
 use App\TicketStateManagement\TicketState;
 use App\TicketStateManagement\TicketStateInterface;
 
 class PendingState extends State implements TicketStateInterface
 {
-
     /**
      * @inheritDoc
      */
@@ -24,32 +22,4 @@ class PendingState extends State implements TicketStateInterface
 
         $this->transition(TicketState::ACCEPTED, "تیکت شما توسط {$actor->name} در حال رسیدگی است", $actor);
     }
-
-    /**
-     * @inheritDoc
-     */
-    public function delegateTo(User $actor, User $target): void
-    {
-        $this->unsupported('delegate');
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function publishToWebService(User $actor): void
-    {
-        $this->unsupported('publishToWebService');
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function reject(): void
-    {
-        $this->unsupported('reject');
-    }
-
-    /**
-     * @inheritDoc
-     */
 }

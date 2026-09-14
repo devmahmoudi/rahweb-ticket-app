@@ -9,23 +9,6 @@ use App\TicketStateManagement\TicketStateInterface;
 
 class DelegatedState extends State implements TicketStateInterface
 {
-
-    /**
-     * @inheritDoc
-     */
-    public function claim(User $actor): void
-    {
-        $this->unsupported('claim');
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function delegateTo(User $actor, User $target): void
-    {
-        $this->unsupported('delegate');
-    }
-
     /**
      * @inheritDoc
      */
@@ -44,7 +27,4 @@ class DelegatedState extends State implements TicketStateInterface
         $this->rejectTransition();
     }
 
-    /**
-     * @inheritDoc
-     */
 }
